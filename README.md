@@ -77,6 +77,7 @@ A short description of the project.
    make stream-stop
    ```
    can be used to start and stop the execution of the script as a background process with no manual input required.
+3. Running the notebook to create AWS resources (`1_create_aws_resources.ipynb`) in a non-interactive approach has not been verified. It is not currently known if this is possible. The notebook can be run interactively.
 
 ## [Project Organization](#project-organization)
 
@@ -99,8 +100,8 @@ A short description of the project.
     ├── data
     │   ├── raw                             <- The original, immutable data dump.
     |   └── processed                       <- Intermediate (transformed) data and final, canonical data sets for modeling.
-    ├── *.ipynb                             <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                                          and a short `-` delimited description, e.g. `1.0-jqp-initial-data-exploration`.
+    ├── 1_create_aws_resources.ipynb        <- create cloud resources on AWS
+    ├── 2_delete_aws_resources.ipynb        <- delete AWS cloud resources
     ├── requirements.txt                    <- base packages required to execute all Jupyter notebooks (incl. jupyter)
     ├── inventories
     │   ├── production
