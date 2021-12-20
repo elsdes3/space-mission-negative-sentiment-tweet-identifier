@@ -1,13 +1,13 @@
 # aws-project-name
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/aws-project-name)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/edesz/aws-project-name/master/0_get_data.ipynb)
-![CI](https://github.com/edesz/aws-project-name/workflows/CI/badge.svg)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/aws-project-name)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/aws-project-name/master/boto3_for_aws_kinesis_stream.ipynb)
+![CI](https://github.com/elsdes3/aws-project-name/actions/workflows/main.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
 ![OpenSource](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
-![pyup](https://pyup.io/repos/github/edesz/aws-project-name/shield.svg)
+![pyup](https://pyup.io/repos/github/elsdes3/aws-project-name/shield.svg)
 
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
