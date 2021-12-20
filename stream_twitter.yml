@@ -1,0 +1,45 @@
+---
+- name: Manage execution of Python twitter streaming script
+  # connection: local
+  # hosts: localhost
+  hosts: ec2host
+  become: false
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  gather_facts: true
+
+  tasks:
+    - name: Ping local host
+      ansible.builtin.ping:
+      register: ping_output
+      tags:
+        - stop
+        - start
+    - name: Show output of ping
+      debug:
+        var: ping_output['ping']
+      tags:
+        - stop
+        - start
+    - name: Run Python twitter script in background
+      ansible.builtin.shell: |
+          nohup python3 twitter_s3.py 2> /dev/null &
+      tags:
+        - start
+    - name: Getting process IDs of Python script process
+      community.general.pids:
+        pattern: python3 twitter_s3.py
+      register: py_script_pid
+      tags:
+        - stop
+        - start
+    - name: Show PIDs for Python script process
+      debug:
+        msg: "PIDs for Python twitter script: {{ py_script_pid['pids'] }}"
+      tags:
+        - stop
+        - start
+    - name: Kill background process for Python twitter script
+      ansible.builtin.shell: "kill -9 {{ py_script_pid['pids'][0] }}"
+      when: py_script_pid['pids']|length > 0
+      tags:
+        - stop

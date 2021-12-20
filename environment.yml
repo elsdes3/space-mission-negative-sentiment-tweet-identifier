@@ -1,0 +1,20 @@
+name: aws-project-name
+channels:
+  - conda-forge
+dependencies:
+  - python==3.9.5
+  - pip==21.2.4
+  - pip:
+    - jupyter==1.0.0
+    - nb_black==1.0.7
+    - papermill==2.3.3
+    - numpy==1.21.2
+    - pandas==1.3.3
+    - scikit-learn==1.0
+    - statsmodels==0.12.2
+    - matplotlib==3.4.3
+    - altair==4.1.0
+    - python-dotenv==0.19.1
+    - fastparquet==0.7.0
+    - pyarrow==5.0.0
+    - azure-storage-blob==12.9.0
