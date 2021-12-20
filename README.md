@@ -12,29 +12,48 @@
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
 2. [Project Organization](#project-organization)
-3. [Usage](#usage)
-4. [Notes](#notes)
+3. [Pre-Requisites](#pre-requisites)
+4. [Usage](#usage)
+5. [Notes](#notes)
 
 ## [About](#about)
 
 A short description of the project.
 
+## [Pre-Requisites](#pre-requisites)
+1. The following environment variables should be set with the user's AWS credendials ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html))
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_KEY`
+   - `AWS_REGION`
+
+   These credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
+
 ## [Usage](#usage)
-1. Provision the EC2 host
+1. Create AWS resources
+   ```bash
+   make aws-create
+   ```
+2. Provision the EC2 host
    ```bash
    make provision
    ```
-2. Start the Twitter streaming script on the EC2 instance
+3. Start the Twitter streaming script locally
+   ```bash
+   make stream_local
+   ```
+
+   This will have to be stopped manually or wait for the specified (hard-coded) number of tweets to have been retrieved. See [notes](#notes) below.
+4. Start the Twitter streaming script on the EC2 instance
    ```bash
    make stream-start
    ```
-3. Stop the Twitter streaming script on the EC2 instance
+5. Stop the Twitter streaming script on the EC2 instance
    ```bash
    make stream-stop
    ```
-4. Start the Twitter streaming script locally
+6. Destroy AWS resources
    ```bash
-   make stream_local
+   make aws-destroy
    ```
 
 ## [Notes](#notes)

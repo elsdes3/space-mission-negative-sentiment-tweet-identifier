@@ -6,6 +6,7 @@
 
 # pylint: disable=invalid-name
 
+import argparse
 import os
 from datetime import datetime
 from typing import Dict, List
@@ -18,9 +19,47 @@ output_notebook_dir = os.path.join(PROJ_ROOT_DIR, "executed_notebooks")
 
 raw_data_path = os.path.join(data_dir, "raw")
 
-zero_dict_nb_name = "0_get_data.ipynb"
+one_dict_nb_name = "1_create_aws_resources.ipynb"
+two_dict_nb_name = "2_delete_aws_resources.ipynb"
 
-zero_dict = dict(ci_run=True, plot_xvar="date")
+firehose_stream_name = "twitter_delivery_stream"
+
+one_dict = dict(
+    s3_bucket_name="testwillz3s",
+    iam_role_path="/",
+    iam_role_name="ec2-dummy-role",
+    iam_role_description="BOTO3 ec2 dummy role",
+    iam_role_trust_policy={
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {"Service": "firehose.amazonaws.com"},
+                "Action": "sts:AssumeRole",
+            }
+        ],
+    },
+    stream_s3_destination_prefix="datasets/twitter/kinesis-demo/YYYY/MM/dd/HH",
+    firehose_stream_name="twitter_delivery_stream",
+    cw_logs_group_name=f"kinesisfirehose_{firehose_stream_name}",
+    sg_group_tags=[{"Key": "Name", "Value": "allow-inbound-ssh"}],
+    key_fname="aws_ec2_key",
+    keypair_name="ec2-key-pair",
+    ec2_instance_image_id="ami-0cc00ed857256d2b4",
+    ec2_instance_type="t2.micro",
+    ec2_instance_tags_list=[{"Key": "Name", "Value": "my-ec2-instance"}],
+)
+two_dict = dict(
+    s3_bucket_name="testwillz3s",
+    iam_role_name="ec2-dummy-role",
+    firehose_stream_name=firehose_stream_name,
+    cw_logs_group_name=f"kinesisfirehose_{firehose_stream_name}",
+    sg_group_tags=[{"Key": "Name", "Value": "allow-inbound-ssh"}],
+    key_fname="aws_ec2_key",
+    keypair_name="ec2-key-pair",
+    ec2_instance_tags_list=[{"Key": "Name", "Value": "my-ec2-instance"}],
+)
 
 
 def papermill_run_notebook(
@@ -73,8 +112,20 @@ def run_notebooks(
 
 
 if __name__ == "__main__":
-    nb_dict_list = [zero_dict]
-    nb_name_list = [zero_dict_nb_name]
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--action",
+        type=str,
+        dest="action",
+        default="create",
+        help="whether to create or destroy AWS resources",
+    )
+    args = parser.parse_args()
+
+    nb_dict_list = [one_dict] if args.action == "create" else [two_dict]
+    nb_name_list = (
+        [one_dict_nb_name] if args.action == "create" else [two_dict_nb_name]
+    )
     notebook_list = [
         {os.path.join(PROJ_ROOT_DIR, nb_name): nb_dict}
         for nb_dict, nb_name in zip(nb_dict_list, nb_name_list)

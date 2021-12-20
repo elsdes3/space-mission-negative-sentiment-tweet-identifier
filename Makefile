@@ -49,11 +49,17 @@ stream_local:
 	@tox -e stream_local
 .PHONY: stream_local
 
-## Run ci build
-ci:
+## Create AWS resources
+aws-create:
 	@echo "+ $@"
-	@tox -e ci
-.PHONY: ci
+	@tox -e ci -- "create"
+.PHONY: aws-create
+
+## Destroy AWS resources
+aws-destroy:
+	@echo "+ $@"
+	@tox -e ci -- "destroy"
+.PHONY: aws-destroy
 
 ## Run jupyterlab
 build:
