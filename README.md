@@ -33,9 +33,24 @@ A short description of the project.
    ```bash
    make aws-create
    ```
-2. Provision the EC2 host
+2. Provision the EC2 host, excluding Python package installation
    ```bash
-   make provision
+   make provision-pre-python
+   ```
+3. In `ansible.cfg` comment out
+   ```bash
+   ansible_python_interpreter: /usr/bin/python2.7  # before installing python3
+   ```
+
+   and uncomment
+   ```bash
+   # ansible_python_interpreter: /usr/bin/python3  # after installing python3
+   ```
+
+   This has to be done since, on initial provisioning of the EC2 host (step 2.), the only version of Python installed on the instance is Python 2.7. After Python 3 is installed in step 2., we need to notify Ansible to use Python 3 instead. This is done in this step.
+4. Install Python packages
+   ```bash
+   make provision-post-python
    ```
 3. Start the Twitter streaming script locally
    ```bash

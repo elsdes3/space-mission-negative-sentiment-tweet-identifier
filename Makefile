@@ -25,11 +25,17 @@ clean-py:
 	@find . -type d -name "__pycache__" -delete
 .PHONY: clean-py
 
-## Provision EC2 instance
-provision:
+## Provision EC2 instance, excluding Python pkg installation
+provision-pre-python:
 	@echo "+ $@"
-	@tox -e provision
-.PHONY: provision
+	@tox -e provision -- "pre-python"
+.PHONY: provision-pre-python
+
+## Install Python packages on EC2 instance
+provision-post-python:
+	@echo "+ $@"
+	@tox -e provision -- "post-python"
+.PHONY: provision-post-python
 
 ## Stream Twitter data on EC2 instance
 stream-start:

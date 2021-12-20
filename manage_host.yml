@@ -11,36 +11,56 @@
             grep ^__version__ /usr/lib/python*/site-packages/yum/__init__.py
         register: cmd_out
         changed_when: false
+        tags:
+          - pre-python
       - name: Show yum version
         debug: msg="yum version check - {{ cmd_out.stdout }}"
+        tags:
+          - pre-python
       - name: Get version of python
         ansible.builtin.shell: python --version
         register: cmd_out
         changed_when: false
+        tags:
+          - pre-python
       - name: Show python version
         debug: msg="python version = {{ cmd_out.stdout }}"
+        tags:
+          - pre-python
       - name: Install python
         yum:
           name: python3
           state: present
         become: true
+        tags:
+          - pre-python
       - name: Install python3-pip
         yum:
           name: python3-pip
           state: present
         become: true
+        tags:
+          - pre-python
       - name: Get version of python3
         ansible.builtin.shell: python3 --version
-        register: cmd_out
+        register: python_ver
         changed_when: false
+        tags:
+          - pre-python
       - name: Show python3 version
-        debug: msg="python3 version = {{ cmd_out.stdout }}"
-      - name: Check version of python3-pip
+        debug: msg="python3 version = {{ python_ver.stdout }}"
+        tags:
+          - pre-python
+      - name: Get version of python3-pip
         ansible.builtin.shell: pip3 --version
-        register: cmd_out
+        register: pip_version_out
         changed_when: false
-      - name: Show python3 version
-        debug: msg="{{ cmd_out.stdout }}"
+        tags:
+          - pre-python
+      - name: Show python3-pip version
+        debug: msg="{{ pip_version_out.stdout }}"
+        tags:
+          - pre-python
       - name: Install Python packages
         pip:
           name: "{{ item }}"
@@ -50,13 +70,21 @@
           - tweepy==4.4.0
           - python-dotenv==0.19.2
           - psutil==5.8.0
+        tags:
+          - post-python
       - name: Get all installed python packages
         ansible.builtin.shell: pip3 freeze
         register: cmd_out
         changed_when: false
+        tags:
+          - post-python
       - name: Show python packages
         debug: msg="{{ cmd_out.stdout }}"
+        tags:
+          - post-python
       - name: Copy Python twitter streamer script
         ansible.builtin.copy:
           src: twitter_s3.py
           dest: twitter_s3.py
+        tags:
+          - post-python
