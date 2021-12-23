@@ -21,8 +21,8 @@ lint:
 ## Remove Python artifacts
 clean-py:
 	@echo "+ $@"
-	@find . -type f -name "*.py[co]" -delete
-	@find . -type d -name "__pycache__" -delete
+	@find ./src -type f -name "*.py[co]" -delete
+	@find ./src -type d -name "__pycache__" -delete
 .PHONY: clean-py
 
 ## Provision EC2 instance, excluding Python pkg installation

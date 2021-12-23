@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name,broad-except,no-self-use
 
 
+import datetime
 import io
 import json
 import os
@@ -15,6 +16,7 @@ import time
 from csv import writer
 from typing import Dict, List
 
+import boto3
 from dotenv import find_dotenv, load_dotenv
 from tweepy import Stream
 
@@ -89,15 +91,19 @@ class TweetStreamListener(Stream):
         "in_reply_to_user_id",
         "in_reply_to_screen_name",
     ]
-    filepath = "CSV_FILE_TWEETS_LOCAL.csv"
     tweet_number = 1
-    max_num_tweets_wanted = 500
+    max_num_tweets_wanted = 20
+
+    # Set kinesis data stream name
+    filepath = "CSV_FILE_TWEETS_LOCAL.csv"
     append_to_local_csv = True
+    # delivery_stream_name = "twitter_delivery_stream"
+    delivery_stream_name = ""
 
     # on success
-    def on_data(self, data):
+    def on_data(self, raw_data):
         """Retrieve tweet attributes."""
-        tweet = json.loads(data)
+        tweet = json.loads(raw_data)
         max_tweets_wanted = TweetStreamListener.max_num_tweets_wanted
         if TweetStreamListener.tweet_number <= max_tweets_wanted:
             try:
@@ -128,16 +134,24 @@ class TweetStreamListener(Stream):
                         + user_list
                         + [tweet_text, "\n"]
                     )
+                    print(
+                        TweetStreamListener.tweet_number,
+                        tweet["created_at"].split(" +")[0],
+                        tweet_text[:75],
+                    )
+                    # Export data to local CSV
                     if TweetStreamListener.append_to_local_csv:
                         append_list_to_local_csv(
                             message_lst[:-1], TweetStreamListener.filepath
                         )
                     message = "\t".join(message_lst)
-                    print(
-                        TweetStreamListener.tweet_number,
-                        tweet["id"],
-                        tweet_text[:75],
-                    )
+                    # Export data to S3, using Kinesis firehose
+                    stream_name = TweetStreamListener.delivery_stream_name
+                    if stream_name:
+                        firehose_client.put_record(
+                            DeliveryStreamName=stream_name,
+                            Record={"Data": message},
+                        )
                     TweetStreamListener.tweet_number += 1
             except (AttributeError, Exception) as e:
                 print(f"{TweetStreamListener.tweet_number} Error: {str(e)}")
@@ -152,18 +166,39 @@ class TweetStreamListener(Stream):
 if __name__ == "__main__":
     load_dotenv(find_dotenv())
 
+    # create kinesis client connection
+    session = boto3.Session()
+    firehose_client = session.client(
+        "firehose", region_name=os.getenv("AWS_REGION")
+    )
+
     args_dict = dict(
         track=[
             "english football",
             "premier league",
             "premierleague",
+            "carabao cup",
+            "efl cup",
+            "football league cup",
+            "english football league cup",
+            "english football league",
+            "english league cup",
+            "league cup",
+            "league cup football",
+            "english football association cup",
+            "english fa cup",
+            "fa cup",
+            "english football association challenge cup",
+            "football association challenge cup",
+            "fa challenge cup",
+            "english fa challenge cup",
             "english premier league",
             "premier league football",
             "barclays premier league",
         ],
         languages=["en"],
         stall_warnings=True,
-        locations=[-6.38, 49.87, 1.77, 55.81],
+        # locations=[-6.38, 49.87, 1.77, 55.81],
     )
     local_csv_fpath = "CSV_FILE_TWEETS_LOCAL.csv"
     headers = [
@@ -216,7 +251,8 @@ if __name__ == "__main__":
 
     while True:
         try:
-            print("Twitter streaming...")
+            local_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            print(f"Twitter streaming started at {local_time}...")
             # create instance of the tweet stream listener
             listener = TweetStreamListener(
                 os.getenv("TWITTER_API_KEY"),
