@@ -226,8 +226,8 @@ def delete_sg(sg_id: str, region: str) -> None:
     except ClientError as e:
         if "dependent object" in str(e):
             print(
-                f"Found object depending on Security Group {sg_id}. "
-                "Cannot delete the Security Group. Did nothing."
+                f"Found object depending on Security Group {sg_id}: {str(e)}."
+                " Cannot delete the Security Group. Did nothing."
             )
     print(f"Deleted Security Group {sg_id}")
 
