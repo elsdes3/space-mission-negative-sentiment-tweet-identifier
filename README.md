@@ -33,7 +33,11 @@ A short description of the project.
    ```bash
    make aws-create
    ```
-   and, in `inventories/production/host_vars/ec2host`, replace `...` in `ansible_host: ...` by the public IP address of the EC2 instance.
+   and, in
+   ```bash
+   inventories/production/host_vars/ec2host
+   ```
+   replace `...` in `ansible_host: ...` by the public IP address of the EC2 instance.
 2. Provision the EC2 host, excluding Python package installation
    ```bash
    make provision-pre-python
