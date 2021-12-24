@@ -34,6 +34,7 @@ provision-pre-python:
 ## Install Python packages on EC2 instance
 provision-post-python:
 	@echo "+ $@"
+	@python3 src/ansible/playbook_utils.py --python-version 3
 	@tox -e provision -- "post-python"
 .PHONY: provision-post-python
 
@@ -50,10 +51,10 @@ stream-stop:
 .PHONY: stream-stop
 
 ## Stream Twitter data locally
-stream_local:
+stream-local:
 	@echo "+ $@"
 	@tox -e stream_local
-.PHONY: stream_local
+.PHONY: stream-local
 
 ## Create AWS resources
 aws-create:
@@ -65,6 +66,7 @@ aws-create:
 aws-destroy:
 	@echo "+ $@"
 	@tox -e ci -- "destroy"
+	@python3 src/ansible/playbook_utils.py --python-version 2.7
 .PHONY: aws-destroy
 
 ## Run jupyterlab
