@@ -23,6 +23,10 @@
     - name: Run Python twitter script in background
       ansible.builtin.shell: |
           nohup python3 twitter_s3.py 2> /dev/null &
+      environment:
+          AWS_ACCESS_KEY_ID: whatever_value
+          AWS_SECRET_ACCESS_KEY: whatever_value
+          AWS_REGION: whatever_value
       tags:
         - start
     - name: Getting process IDs of Python script process

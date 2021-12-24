@@ -96,7 +96,6 @@ class TweetStreamListener(Stream):
 
     # Set kinesis data stream name
     filepath = "CSV_FILE_TWEETS_LOCAL.csv"
-    append_to_local_csv = True
     # delivery_stream_name = "twitter_delivery_stream"
     delivery_stream_name = ""
 
@@ -140,7 +139,7 @@ class TweetStreamListener(Stream):
                         tweet_text[:75],
                     )
                     # Export data to local CSV
-                    if TweetStreamListener.append_to_local_csv:
+                    if append_to_local_csv:
                         append_list_to_local_csv(
                             message_lst[:-1], TweetStreamListener.filepath
                         )
@@ -164,13 +163,18 @@ class TweetStreamListener(Stream):
 
 
 if __name__ == "__main__":
-    load_dotenv(find_dotenv())
+    if os.path.exists("../.env"):
+        load_dotenv(find_dotenv())
 
     # create kinesis client connection
     session = boto3.Session()
     firehose_client = session.client(
         "firehose", region_name=os.getenv("AWS_REGION")
     )
+
+    # Options for saving tweets to local CSV file
+    append_to_local_csv = False
+    local_csv_fpath = "CSV_FILE_TWEETS_LOCAL.csv"
 
     args_dict = dict(
         track=[
@@ -200,7 +204,6 @@ if __name__ == "__main__":
         stall_warnings=True,
         # locations=[-6.38, 49.87, 1.77, 55.81],
     )
-    local_csv_fpath = "CSV_FILE_TWEETS_LOCAL.csv"
     headers = [
         "id",
         "geo",
@@ -242,12 +245,13 @@ if __name__ == "__main__":
         "text",
     ]
 
-    if os.path.exists(local_csv_fpath):
-        os.remove(local_csv_fpath)
-        print(f"Found local file at {local_csv_fpath}. Deleted.")
-    else:
-        print(f"Did not find local file at {local_csv_fpath}.")
-    append_list_to_local_csv(headers, local_csv_fpath)
+    if append_to_local_csv:
+        if os.path.exists(local_csv_fpath):
+            os.remove(local_csv_fpath)
+            print(f"Found local file at {local_csv_fpath}. Deleted.")
+        else:
+            print(f"Did not find local file at {local_csv_fpath}.")
+        append_list_to_local_csv(headers, local_csv_fpath)
 
     while True:
         try:

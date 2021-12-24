@@ -70,6 +70,7 @@
           - tweepy==4.4.0
           - python-dotenv==0.19.2
           - psutil==5.8.0
+          - boto3==1.20.26
         tags:
           - post-python
       - name: Get all installed python packages
@@ -85,6 +86,6 @@
       - name: Copy Python twitter streamer script
         ansible.builtin.copy:
           src: twitter_s3.py
-          dest: twitter_s3.py
+          dest: "/home/{{ ansible_user }}/twitter_s3.py"
         tags:
           - post-python
