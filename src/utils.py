@@ -6,6 +6,7 @@
 
 
 from IPython.display import display
+from pandas import DataFrame
 
 # pylint: disable=invalid-name
 
@@ -52,7 +53,37 @@ def save_to_parquet_file(dfs, parquet_filepaths):
             raise
 
 
-def summarize_df(df, col_dtype_to_show):
+def summarize_df(df: DataFrame) -> None:
+    """Show properties of a DataFrame."""
+    display(
+        df.dtypes.rename("dtype")
+        .to_frame()
+        .merge(
+            df.isna().sum().rename("num_missing").to_frame(),
+            left_index=True,
+            right_index=True,
+            how="left",
+        )
+        .assign(num=len(df))
+        .merge(
+            df.nunique().rename("nunique").to_frame(),
+            left_index=True,
+            right_index=True,
+            how="left",
+        )
+        .merge(
+            df
+            # .dropna(how="any")
+            .sample(1).squeeze().rename("single_value").to_frame(),
+            left_index=True,
+            right_index=True,
+            how="left",
+        )
+    )
+
+
+def summarize_df_single_dtype(df: DataFrame, col_dtype_to_show: str) -> None:
+    """Summarize specific column datatype."""
     if col_dtype_to_show == "object":
         # Get string dtype columns
         cols_to_show = list(df.select_dtypes("object"))

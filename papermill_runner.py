@@ -25,10 +25,10 @@ two_dict_nb_name = "2_delete_aws_resources.ipynb"
 firehose_stream_name = "twitter_delivery_stream"
 
 one_dict = dict(
-    s3_bucket_name="testwillz3s",
+    s3_bucket_name="sagemakertestwillz3s",
     iam_role_path="/",
-    iam_role_name="ec2-dummy-role",
-    iam_role_description="BOTO3 ec2 dummy role",
+    iam_role_name="kinesis-firehose-role",
+    iam_role_description="IAM Role to be assumed by Kinesis Firehose",
     iam_role_trust_policy={
         "Version": "2012-10-17",
         "Statement": [
@@ -40,7 +40,14 @@ one_dict = dict(
             }
         ],
     },
-    stream_s3_destination_prefix="datasets/twitter/kinesis-demo/YYYY/MM/dd/HH",
+    iam_firehose_s3_policy_name="mypolicy",
+    iam_firehose_s3_policy_description=(
+        "IAM Policy Granting Firehose Access to S3"
+    ),
+    iam_firehose_s3_policy_tags=[
+        {"Key": "Name", "Value": "firehose_access_s3"}
+    ],
+    stream_s3_destination_prefix="datasets/twitter/kinesis-demo/",
     firehose_stream_name="twitter_delivery_stream",
     cw_logs_group_name=f"kinesisfirehose_{firehose_stream_name}",
     sg_group_tags=[{"Key": "Name", "Value": "allow-inbound-ssh"}],
@@ -49,10 +56,13 @@ one_dict = dict(
     ec2_instance_image_id="ami-0cc00ed857256d2b4",
     ec2_instance_type="t2.micro",
     ec2_instance_tags_list=[{"Key": "Name", "Value": "my-ec2-instance"}],
+    ansible_inventory_host_vars_fpath=(
+        "inventories/production/host_vars/ec2host"
+    ),
 )
 two_dict = dict(
-    s3_bucket_name="testwillz3s",
-    iam_role_name="ec2-dummy-role",
+    s3_bucket_name="sagemakertestwillz3s",
+    iam_role_name="kinesis-firehose-role",
     firehose_stream_name=firehose_stream_name,
     cw_logs_group_name=f"kinesisfirehose_{firehose_stream_name}",
     sg_group_tags=[{"Key": "Name", "Value": "allow-inbound-ssh"}],

@@ -20,18 +20,43 @@
       tags:
         - stop
         - start
+    - name: Show required environment variables
+      debug:
+        msg: "{{ item }}: {{ lookup('env', item) }}"
+      loop:
+        - 'AWS_ACCESS_KEY_ID'
+        - 'AWS_SECRET_ACCESS_KEY'
+        - 'AWS_REGION'
+        - 'TWITTER_API_KEY'
+        - 'TWITTER_API_KEY_SECRET'
+        - 'TWITTER_ACCESS_TOKEN'
+        - 'TWITTER_ACCESS_TOKEN_SECRET'
+      # tags:
+      #   - start
+      #   - stop
     - name: Run Python twitter script in background
-      ansible.builtin.shell: |
-          nohup python3 twitter_s3.py 2> /dev/null &
+      ansible.builtin.shell: >
+          nohup python3 {{ ansible_env.HOME }}/twitter_s3.py \
+          --local-csv-fpath="{{ local_csv_fpath }}" \
+          --delivery-stream-name="{{ delivery_stream_name }}" \
+          2> /dev/null &
       environment:
-          AWS_ACCESS_KEY_ID: whatever_value
-          AWS_SECRET_ACCESS_KEY: whatever_value
-          AWS_REGION: whatever_value
+          AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+          AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+          AWS_REGION: "{{ lookup('env', 'AWS_REGION') }}"
+          TWITTER_API_KEY: "{{ lookup('env', 'TWITTER_API_KEY') }}"
+          TWITTER_API_KEY_SECRET: "{{ lookup('env', 'TWITTER_API_KEY_SECRET') }}"
+          TWITTER_ACCESS_TOKEN: "{{ lookup('env', 'TWITTER_ACCESS_TOKEN') }}"
+          TWITTER_ACCESS_TOKEN_SECRET: "{{ lookup('env', 'TWITTER_ACCESS_TOKEN_SECRET') }}"
       tags:
         - start
+      register: py_out
+    # - debug: "msg={{ py_out }}"
+    #   tags:
+    #     - start
     - name: Getting process IDs of Python script process
       community.general.pids:
-        pattern: python3 twitter_s3.py
+        pattern: twitter_s3.py
       register: py_script_pid
       tags:
         - stop

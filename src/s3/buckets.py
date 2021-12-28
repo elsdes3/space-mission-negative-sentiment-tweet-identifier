@@ -15,6 +15,7 @@ def create_s3_bucket(s3_bucket_name: str, aws_region: str) -> Dict:
     """Create S3 bucket."""
     s3_client = boto3.client("s3", region_name=aws_region)
     bucket_creation_response = s3_client.create_bucket(
+        # ACL="private",
         Bucket=s3_bucket_name,
         CreateBucketConfiguration={"LocationConstraint": aws_region},
     )

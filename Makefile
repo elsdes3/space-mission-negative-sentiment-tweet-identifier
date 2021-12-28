@@ -41,20 +41,32 @@ provision-post-python:
 ## Stream Twitter data on EC2 instance
 stream-start:
 	@echo "+ $@"
-	@tox -e stream -- "start"
+	@tox -e stream -- --target-type="ec2"
 .PHONY: stream-start
 
 ## Stop Stream of Twitter data on EC2 instance
 stream-stop:
 	@echo "+ $@"
-	@tox -e stream -- "stop"
+	@tox -e stream -- --tag="stop" --target-type="ec2"
 .PHONY: stream-stop
 
-## Stream Twitter data locally
-stream-local:
+## Stream Twitter data locally, without saving to CSV or to S3 via Firehose
+stream-local-start:
 	@echo "+ $@"
-	@tox -e stream_local
-.PHONY: stream-local
+	@tox -e stream
+.PHONY: stream-local-start
+
+## Stop Stream of Twitter data locally
+stream-local-stop:
+	@echo "+ $@"
+	@tox -e stream -- --tag="stop"
+.PHONY: stream-local-stop
+
+## Directly run Stream of Twitter data locally
+stream-check:
+	@echo "+ $@"
+	@tox -e stream_check
+.PHONY: stream-check
 
 ## Create AWS resources
 aws-create:

@@ -42,36 +42,43 @@ A short description of the project.
    ```bash
    make provision-pre-python
    ```
-3. In `ansible.cfg` comment out
-   ```bash
-   ansible_python_interpreter: /usr/bin/python2.7  # before installing python3
-   ```
-
-   and uncomment
-   ```bash
-   # ansible_python_interpreter: /usr/bin/python3  # after installing python3
-   ```
-
-   This has to be done since, on initial provisioning of the EC2 host (step 2.), the only version of Python installed on the instance is Python 2.7. After Python 3 is installed in step 2., we need to notify Ansible to use Python 3 instead. This is done in this step.
-4. Install Python packages
+3. Install Python packages
    ```bash
    make provision-post-python
    ```
-3. Start the Twitter streaming script locally
+4. Start the Twitter streaming script locally
    ```bash
-   make stream_local
+   make stream-local-start
    ```
-
-   This will have to be stopped manually or wait for the specified (hard-coded) number of tweets to have been retrieved. See [notes](#notes) below.
-4. Start the Twitter streaming script on the EC2 instance
+5. Stop the Twitter streaming script running locally
+   ```bash
+   make stream-local-stop
+   ```
+6. Start the Twitter streaming script on the EC2 instance
    ```bash
    make stream-start
    ```
-5. Stop the Twitter streaming script on the EC2 instance
+7. Stop the Twitter streaming script running on the EC2 instance
    ```bash
    make stream-stop
    ```
-6. Destroy AWS resources
+8. Run the Twitter streaming script locally, saving to a local CSV file but not to S3
+   ```bash
+   make stream-check
+   ```
+   Note the following about this step
+   - there is no functionality to stop this script (it has to be stopped manually using Ctrl + C, or wait until the specified number of tweets, in `max_num_tweets_wanted` on line 126 of `twitter_s3.py`, have been retrieved)
+   - the following environment variables must be manually set, before running this script, using
+     ```bash
+     export AWS_ACCESS_KEY_ID=...
+     export AWS_SECRET_KEY=...
+     export AWS_REGION=...
+     export TWITTER_API_KEY=...
+     export TWITTER_API_KEY_SECRET=...
+     export TWITTER_ACCESS_TOKEN=...
+     export TWITTER_ACCESS_TOKEN_SECRET=...
+     ```
+9. Destroy AWS resources
    ```bash
    make aws-destroy
    ```

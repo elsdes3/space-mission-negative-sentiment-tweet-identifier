@@ -4,6 +4,9 @@ scikit-learn==1.0.1
 matplotlib==3.5.1
 seaborn==0.11.2
 python-dotenv==0.19.2
-pyspark==3.2.0
+dask==2021.12.0
+dask[dataframe]==2021.12.0
+emoji==1.6.1
 nltk==3.6.5
+pyspark==3.2.0
 boto3==1.20.24

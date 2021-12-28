@@ -20,6 +20,8 @@ def create_kinesis_firehose_stream(
     iam_role_name: str,
     iam_role_path: str,
     aws_region: str,
+    buffer_size_mbs: int = 5,
+    buffer_interval_sec: int = 300,
 ) -> Dict:
     """Create AWS Kinesis Firehose Stream."""
     client = boto3.client("iam", region_name=aws_region)
@@ -40,8 +42,8 @@ def create_kinesis_firehose_stream(
                     "BucketARN": f"arn:aws:s3:::{s3_bucket_name}",
                     "Prefix": stream_s3_destination_prefix,
                     "BufferingHints": {
-                        "SizeInMBs": 5,
-                        "IntervalInSeconds": 300,
+                        "SizeInMBs": buffer_size_mbs,
+                        "IntervalInSeconds": buffer_interval_sec,
                     },
                     "CompressionFormat": "UNCOMPRESSED",
                     "EncryptionConfiguration": {
