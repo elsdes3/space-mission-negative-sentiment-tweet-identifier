@@ -85,7 +85,7 @@ def attach_iam_policy_to_role(
 
 
 def delete_iam_policy(
-    iam_policy_arn: str, iam_role_name: str, region: str
+    iam_policy_arn: str, iam_role_name: str, region: str, delete: bool = True
 ) -> Dict:
     """Delete IAM Policy."""
     iam_client = boto3.client("iam", region_name=region)
@@ -93,8 +93,10 @@ def delete_iam_policy(
         RoleName=iam_role_name, PolicyArn=iam_policy_arn
     )
     print(f"Detached IAM policy {iam_policy_arn} from role {iam_role_name}")
-    policy_deletion_response = iam_client.delete_policy(
-        PolicyArn=iam_policy_arn
-    )
-    print(f"Deleted IAM policy {iam_policy_arn}")
+    if delete:
+        policy_deletion_response = iam_client.delete_policy(
+            PolicyArn=iam_policy_arn
+        )
+        print(f"Deleted IAM policy {iam_policy_arn}")
+        policy_deletion_response = None
     return [policy_detachment_response, policy_deletion_response]

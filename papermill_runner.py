@@ -23,9 +23,13 @@ one_dict_nb_name = "1_create_aws_resources.ipynb"
 two_dict_nb_name = "2_delete_aws_resources.ipynb"
 
 firehose_stream_name = "twitter_delivery_stream"
+sg_group_name = "mysgname"
+nb_instance_name = "mydemo"
+s3_bucket_name = "sagemakertestwillz3s"
+ansible_host_vars_filepath = "inventories/production/host_vars/ec2host"
 
 one_dict = dict(
-    s3_bucket_name="sagemakertestwillz3s",
+    s3_bucket_name=s3_bucket_name,
     iam_role_path="/",
     iam_role_name="kinesis-firehose-role",
     iam_role_description="IAM Role to be assumed by Kinesis Firehose",
@@ -56,19 +60,93 @@ one_dict = dict(
     ec2_instance_image_id="ami-0cc00ed857256d2b4",
     ec2_instance_type="t2.micro",
     ec2_instance_tags_list=[{"Key": "Name", "Value": "my-ec2-instance"}],
-    ansible_inventory_host_vars_fpath=(
-        "inventories/production/host_vars/ec2host"
-    ),
+    ansible_inventory_host_vars_fpath=ansible_host_vars_filepath,
 )
 two_dict = dict(
-    s3_bucket_name="sagemakertestwillz3s",
+    s3_bucket_name="",
+    iam_role_name="AmazonSageMaker-ExecutionRole-20211228T122046",
+    sg_group_name="mysgname",
+    sg_group_desc="My security group",
+    sg_group_tags=[{"Key": "Name", "Value": sg_group_name}],
+    nb_lifecycle_name="mynbconfig",
+    nb_instance_name=nb_instance_name,
+    nb_instance_type="ml.t3.xlarge",
+    nb_instance_tags=[{"Key": "Name", "Value": nb_instance_name}],
+    cw_log_group_name="/aws/sagemaker/NotebookInstances",
+)
+three_dict = dict(
+    s3_bucket_name=s3_bucket_name,
+    path_to_folder="/datasets/twitter/kinesis-demo/",
+    headers=[
+        "id",
+        "geo",
+        "coordinates",
+        "place",
+        "contributors",
+        "is_quote_status",
+        "quote_count",
+        "reply_count",
+        "retweet_count",
+        "favorite_count",
+        "favorited",
+        "retweeted",
+        "created_at",
+        "source",
+        "in_reply_to_user_id",
+        "in_reply_to_screen_name",
+        "source_text",
+        "place_id",
+        "place_url",
+        "place_place_type",
+        "place_name",
+        "place_full_name",
+        "place_country_code",
+        "place_country",
+        "place_bounding_box_type",
+        "place_bounding_box_coordinates",
+        "place_attributes",
+        "coords_type",
+        "coords_lon",
+        "coords_lat",
+        "geo_type",
+        "geo_lon",
+        "geo_lat",
+        "user_name",
+        "user_screen_name",
+        "user_followers",
+        "user_friends",
+        "user_listed",
+        "user_favourites",
+        "user_statuses",
+        "user_protected",
+        "user_verified",
+        "user_contributors_enabled",
+        "user_joined",
+        "user_location",
+        "text",
+    ],
+)
+four_dict = dict(
+    s3_bucket_name="",
+    iam_role_name="AmazonSageMaker-ExecutionRole-20211228T122046",
+    iam_policy_name="AmazonSageMaker-ExecutionPolicy-20211228T122046",
+    sg_group_name="mysgname",
+    nb_lifecycle_name="mynbconfig",
+    nb_instance_name="mydemo",
+    nb_instance_tags=[{"Key": "Name", "Value": nb_instance_name}],
+    cw_log_group_name="/aws/sagemaker/NotebookInstances",
+)
+five_dict = dict(
+    s3_bucket_name=s3_bucket_name,
     iam_role_name="kinesis-firehose-role",
+    iam_policy_name="mypolicy",
     firehose_stream_name=firehose_stream_name,
     cw_logs_group_name=f"kinesisfirehose_{firehose_stream_name}",
     sg_group_tags=[{"Key": "Name", "Value": "allow-inbound-ssh"}],
     key_fname="aws_ec2_key",
     keypair_name="ec2-key-pair",
     ec2_instance_tags_list=[{"Key": "Name", "Value": "my-ec2-instance"}],
+    ansible_inventory_host_vars_fpath=ansible_host_vars_filepath,
 )
 
 
