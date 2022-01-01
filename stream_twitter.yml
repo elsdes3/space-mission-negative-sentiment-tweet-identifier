@@ -14,12 +14,14 @@
       tags:
         - stop
         - start
+        - check
     - name: Show output of ping
       debug:
         var: ping_output['ping']
       tags:
         - stop
         - start
+        - check
     - name: Show required environment variables
       debug:
         msg: "{{ item }}: {{ lookup('env', item) }}"
@@ -31,9 +33,8 @@
         - 'TWITTER_API_KEY_SECRET'
         - 'TWITTER_ACCESS_TOKEN'
         - 'TWITTER_ACCESS_TOKEN_SECRET'
-      # tags:
-      #   - start
-      #   - stop
+      tags:
+        - check
     - name: Run Python twitter script in background
       ansible.builtin.shell: >
           nohup python3 {{ ansible_env.HOME }}/twitter_s3.py \
@@ -48,12 +49,9 @@
           TWITTER_API_KEY_SECRET: "{{ lookup('env', 'TWITTER_API_KEY_SECRET') }}"
           TWITTER_ACCESS_TOKEN: "{{ lookup('env', 'TWITTER_ACCESS_TOKEN') }}"
           TWITTER_ACCESS_TOKEN_SECRET: "{{ lookup('env', 'TWITTER_ACCESS_TOKEN_SECRET') }}"
+      register: py_out
       tags:
         - start
-      register: py_out
-    # - debug: "msg={{ py_out }}"
-    #   tags:
-    #     - start
     - name: Getting process IDs of Python script process
       community.general.pids:
         pattern: twitter_s3.py

@@ -84,6 +84,7 @@
         executable: pip3
       with_items:
         - tweepy==4.4.0
+        - emoji==1.6.1
         - psutil==5.8.0
         - boto3==1.20.26
       tags:
@@ -98,7 +99,7 @@
       debug: msg="{{ py_pkgs_out.stdout }}"
       tags:
         - post-python
-    - name: Copy Python twitter streamer script
+    - name: Ensure Python twitter streamer script is present
       ansible.builtin.copy:
         src: twitter_s3.py
         dest: "{{ ansible_env.HOME }}/twitter_s3.py"

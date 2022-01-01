@@ -9,6 +9,13 @@
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 ![pyup](https://pyup.io/repos/github/elsdes3/aws-project-name/shield.svg)
 
+1. [Get word list](https://stackoverflow.com/a/45378529/4057186)
+2. Tutorials
+   - [1]](https://medium.com/@the.data.yoga/creating-word2vec-embeddings-on-a-large-text-corpus-with-pyspark-469007116551)
+   - [2](https://gabefair.github.io/posts/2018/12/Understanding-Word2Vec-With-Pyspark/)
+https://stackoverflow.com/a/56390537/4057186
+https://stackoverflow.com/a/56391842/4057186
+
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
 2. [Project Organization](#project-organization)
@@ -25,6 +32,7 @@ A short description of the project.
    - `AWS_ACCESS_KEY_ID`
    - `AWS_SECRET_KEY`
    - `AWS_REGION`
+   - `AWS_S3_BUCKET_NAME`
 
    These credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
 
@@ -37,7 +45,7 @@ A short description of the project.
    ```bash
    inventories/production/host_vars/ec2host
    ```
-   replace `...` in `ansible_host: ...` by the public IP address of the EC2 instance.
+   replace `...` in `ansible_host: ...` by the public IP address of the newly created EC2 instance from step 1.
 2. Provision the EC2 host, excluding Python package installation
    ```bash
    make provision-pre-python
@@ -66,45 +74,39 @@ A short description of the project.
    ```bash
    make stream-check
    ```
-   Note the following about this step
+   Notes
    - there is no functionality to stop this script (it has to be stopped manually using Ctrl + C, or wait until the specified number of tweets, in `max_num_tweets_wanted` on line 126 of `twitter_s3.py`, have been retrieved)
+
+   Pre-Requisites
    - the following environment variables must be manually set, before running this script, using
      ```bash
      export AWS_ACCESS_KEY_ID=...
      export AWS_SECRET_KEY=...
      export AWS_REGION=...
+     export AWS_S3_BUCKET_NAME=...
      export TWITTER_API_KEY=...
      export TWITTER_API_KEY_SECRET=...
      export TWITTER_ACCESS_TOKEN=...
      export TWITTER_ACCESS_TOKEN_SECRET=...
      ```
-9. Destroy AWS resources
+9. Provision AWS SageMaker resources
    ```bash
-   make aws-destroy
+   make sagemaker-create
    ```
+
+   Pre-Requisites
+   - an AWS IAM Role granting SageMaker full access to **one** pre-existing S3 bucket (the same bucket created in step 1.) must be created using the AWS console **before** running this step.
+10. Destroy AWS SageMaker resources
+    ```bash
+    make sagemaker-destroy
+    ```
+11. Destroy AWS resources
+    ```bash
+    make aws-destroy
+    ```
 
 ## [Notes](#notes)
-1. Running the Twitter streaming script locally is a manual process done using
-   ```bash
-   make stream_local
-   ```
-
-   This will run the Python streaming script in a background process. It will be up to the user to manually
-   - find the appropriate background process ID
-   - stop the process
-
-   if the script is to be stopped before it reaches the preset limit for maximum number of tweets to be streamed.
-2. Running the streaming script remotely is done using the Ansible playbook `stream_twitter.yml` and tags `start` and `stop` via
-   ```bash
-   make stream-start
-   ```
-   and
-
-   ```bash
-   make stream-stop
-   ```
-   can be used to start and stop the execution of the script as a background process with no manual input required.
-3. Running the notebook to create AWS resources (`1_create_aws_resources.ipynb`) in a non-interactive approach has not been verified. It is not currently known if this is possible. The notebook can be run interactively.
+1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
 
 ## [Project Organization](#project-organization)
 
@@ -120,15 +122,20 @@ A short description of the project.
     ├── environment.yml                     <- configuration file to create environment to run project on Binder
     ├── manage_host.yml                     <- manage provisioning of EC2 host
     ├── read_data.py                        <- Python script to read streamed Twitter data that has been saved locally
+    ├── streamer.py                         <- Wrapper script to control local or remote Twitter streaming
     ├── stream_twitter.yml                  <- stream Twitter data on EC2 instance
     ├── twitter_s3.py                       <- Python script to stream Twitter data locally or on EC2 instance
+    ├── variables_run.yaml                  <- Ansible playbook variables
     ├── executed_notebooks
     |   └── *.ipynb                         <- executed notebooks, with output and execution datetime suffix in filename
     ├── data
     │   ├── raw                             <- The original, immutable data dump.
     |   └── processed                       <- Intermediate (transformed) data and final, canonical data sets for modeling.
     ├── 1_create_aws_resources.ipynb        <- create cloud resources on AWS
-    ├── 2_delete_aws_resources.ipynb        <- delete AWS cloud resources
+    ├── 2_create_sagemaker_resources.ipynb  <- create AWS SageMaker resources
+    ├── 3_combine_raw_data.ipynb            <- combine raw tweets data stored in S3 into CSV files
+    ├── 4_delete_aws_resources.ipynb        <- destroy cloud resources on AWS
+    ├── 5_delete_aws_resources.ipynb        <- destroy AWS cloud resources
     ├── requirements.txt                    <- base packages required to execute all Jupyter notebooks (incl. jupyter)
     ├── inventories
     │   ├── production
@@ -138,8 +145,14 @@ A short description of the project.
     ├── src                                 <- Source code for use in this project.
     │   ├── __init__.py                     <- Makes src a Python module
     │   │
+    │   ├── ansible                         <- Utilities to support Ansible orchestration playbooks
+    │       └── playbook_utils.py
+    │   │
     │   ├── cw                              <- Scripts to manage AWS CloudWatch Log Groups and Streams
     │       └── cloudwatch_logs.py
+    │   │
+    │   ├── data                            <- Scripts to combine raw tweets data pre hour into a CSV file
+    │       └── combine_data.py
     │   │
     │   ├── ec2                             <- Scripts to manage AWS EC2 instances and security groups
     │       └── ec2_instances_sec_groups.py

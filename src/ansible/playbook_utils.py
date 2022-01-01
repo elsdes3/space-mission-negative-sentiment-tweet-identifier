@@ -58,12 +58,12 @@ def set_path_to_streamer_script(
         cmd_str = prefix_str + "{{ ansible_env.HOME }}/twitter_s3.py \\"
     else:
         cmd_str = f"{prefix_str}twitter_s3.py \\"
-    if lines[38] == cmd_str + "\n":
+    if lines[39] == cmd_str + "\n":
         print(
             "Previously changed to use specified path to script. Did nothing."
         )
     else:
-        lines[38] = cmd_str + "\n"
+        lines[39] = cmd_str + "\n"
         print("Changed to use specified path to script.")
     with open(nb_fpath, "w", encoding=locale_enc) as f:
         f.writelines(lines)

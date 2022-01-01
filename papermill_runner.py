@@ -20,12 +20,14 @@ output_notebook_dir = os.path.join(PROJ_ROOT_DIR, "executed_notebooks")
 raw_data_path = os.path.join(data_dir, "raw")
 
 one_dict_nb_name = "1_create_aws_resources.ipynb"
-two_dict_nb_name = "2_delete_aws_resources.ipynb"
+two_dict_nb_name = "2_create_sagemaker_resources.ipynb"
+five_dict_nb_name = "5_delete_sagemaker_resources.ipynb"
+six_dict_nb_name = "6_delete_aws_resources.ipynb"
 
+s3_bucket_name = os.getenv("AWS_S3_BUCKET_NAME")
 firehose_stream_name = "twitter_delivery_stream"
 sg_group_name = "mysgname"
 nb_instance_name = "mydemo"
-s3_bucket_name = "sagemakertestwillz3s"
 ansible_host_vars_filepath = "inventories/production/host_vars/ec2host"
 
 one_dict = dict(
@@ -126,17 +128,18 @@ three_dict = dict(
         "text",
     ],
 )
-four_dict = dict(
+five_dict = dict(
     s3_bucket_name="",
     iam_role_name="AmazonSageMaker-ExecutionRole-20211228T122046",
     iam_policy_name="AmazonSageMaker-ExecutionPolicy-20211228T122046",
+    delete_iam_resources="no",
     sg_group_name="mysgname",
     nb_lifecycle_name="mynbconfig",
     nb_instance_name="mydemo",
     nb_instance_tags=[{"Key": "Name", "Value": nb_instance_name}],
     cw_log_group_name="/aws/sagemaker/NotebookInstances",
 )
-five_dict = dict(
+six_dict = dict(
     s3_bucket_name=s3_bucket_name,
     iam_role_name="kinesis-firehose-role",
     iam_policy_name="mypolicy",
@@ -210,10 +213,15 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    nb_dict_list = [one_dict] if args.action == "create" else [two_dict]
-    nb_name_list = (
-        [one_dict_nb_name] if args.action == "create" else [two_dict_nb_name]
-    )
+    if args.action == "create":
+        nb_dict_list, nb_name_list = [one_dict, one_dict_nb_name]
+    elif args.action == "sagemaker-create":
+        nb_dict_list, nb_name_list = [two_dict, two_dict_nb_name]
+    elif args.action == "sagemaker-delete":
+        nb_dict_list, nb_name_list = [five_dict, five_dict_nb_name]
+    elif args.action == "delete":
+        nb_dict_list, nb_name_list = [six_dict, six_dict_nb_name]
+
     notebook_list = [
         {os.path.join(PROJ_ROOT_DIR, nb_name): nb_dict}
         for nb_dict, nb_name in zip(nb_dict_list, nb_name_list)

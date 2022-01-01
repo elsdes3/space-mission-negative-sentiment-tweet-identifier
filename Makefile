@@ -25,6 +25,18 @@ clean-py:
 	@find ./src -type d -name "__pycache__" -delete
 .PHONY: clean-py
 
+## Create AWS resources
+aws-create:
+	@echo "+ $@"
+	@tox -e ci -- "create"
+.PHONY: aws-create
+
+## Create AWS SageMaker resources
+aws-sagemaker-create:
+	@echo "+ $@"
+	@tox -e ci -- "sagemaker-create"
+.PHONY: aws-sagemaker-create
+
 ## Provision EC2 instance, excluding Python pkg installation
 provision-pre-python:
 	@echo "+ $@"
@@ -68,11 +80,11 @@ stream-check:
 	@tox -e stream_check
 .PHONY: stream-check
 
-## Create AWS resources
-aws-create:
+## Delete AWS SageMaker resources
+aws-sagemaker-delete:
 	@echo "+ $@"
-	@tox -e ci -- "create"
-.PHONY: aws-create
+	@tox -e ci -- "sagemaker-delete"
+.PHONY: aws-sagemaker-delete
 
 ## Destroy AWS resources
 aws-destroy:

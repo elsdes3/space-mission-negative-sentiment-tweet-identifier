@@ -16,13 +16,106 @@ import datetime
 import io
 import json
 import os
+import re
 import sys
 import time
 from csv import writer
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import boto3
+import emoji
 from tweepy import Stream
+
+
+def get_tweet_text(tweet: Dict) -> str:
+    """Extract full text from the tweet."""
+    # if not Retweet and extended_tweet is present
+    if "extended_tweet" in list(tweet.keys()):
+        try:
+            # print(
+            #     "extended_tweet_full_text",
+            #     tweet["user"]["screen_name"],
+            #     tweet["extended_tweet"]["full_text"],
+            # )
+            tweet_text = tweet["extended_tweet"]["full_text"]
+        except Exception:
+            # print(
+            #     "extended_tweet_text",
+            #     tweet["user"]["screen_name"],
+            #     tweet["text"],
+            # )
+            tweet_text = tweet["text"]
+    # if Retweet
+    elif "retweeted_status" in list(tweet.keys()):
+        # print(
+        #     "retweeted_status",
+        #     tweet["retweeted_status"],
+        # )
+        try:
+            # print(
+            #     "retweeted_status_extended_tweet_full_text",
+            #     tweet["user"]["screen_name"],
+            #     tweet["retweeted_status"]["extended_tweet"][
+            #         "full_text"
+            #     ],
+            # )
+            tweet_text = tweet["retweeted_status"]["extended_tweet"][
+                "full_text"
+            ]
+        except Exception:
+            # print(
+            #     "retweeted_status_text",
+            #     tweet["user"]["screen_name"],
+            #     tweet["retweeted_status"]["text"],
+            # )
+            tweet_text = tweet["retweeted_status"]["text"]
+    # if not Retweet and extended_tweet is not present
+    elif "text" in list(tweet.keys()):
+        # print(
+        #     "text",
+        #     tweet["user"]["screen_name"],
+        #     tweet["text"],
+        # )
+        tweet_text = tweet["text"]
+    else:
+        tweet_text = None
+    # print()
+    return tweet_text
+
+
+def remove_emoji(string: str, remove: bool = True) -> str:
+    """Remove emoji from string."""
+    if remove:
+        return emoji.get_emoji_regexp().sub("", string)
+    return emoji.demojize(string)
+
+
+def get_special_chars_from_tweet(
+    tweet_text: str,
+) -> List[Union[str, int]]:
+    """Extract urls, hashtags and usernames from text of tweet."""
+    # # Extract urls from text of tweet
+    tweet_text_urls = re.findall(r"(https?://[^\s]+)", tweet_text)
+    # # Extract hashtags from text of tweet
+    hashtag_list = re.findall(r"#(\w+)", tweet_text)
+    user_names_list = re.findall(r"@(\w+)", tweet_text)
+    # # Extract number of urls, hashtags and usernames in text of tweet
+    num_urls_in_tweet = str(len(tweet_text_urls))
+    num_users_in_tweet = str(len(user_names_list))
+    num_hashtags_in_tweet = str(len(hashtag_list))
+    # # Delete urls, hashtags (#...) and usernames (@...) from text of tweet
+    tweet_text = re.sub(r"http\S+", "", tweet_text).rstrip()
+    tweet_text = re.sub(r"@\S+", "", tweet_text).rstrip()
+    tweet_text = re.sub(r"#\S+", "", tweet_text).rstrip()
+    return [
+        "|".join(tweet_text_urls),
+        "|".join(hashtag_list),
+        "|".join(user_names_list),
+        num_urls_in_tweet,
+        num_users_in_tweet,
+        num_hashtags_in_tweet,
+        tweet_text,
+    ]
 
 
 def load_env_vars() -> List[str]:
@@ -69,10 +162,8 @@ def get_geo_coords_list(tweet: Dict, attr: str = "coordinates") -> List:
             str(tweet[attr]["coordinates"][0]),
             str(tweet[attr]["coordinates"][1]),
         )
-        # print(1, tweet[attr])
     else:
         coords_list = ["", "", ""]
-        # print(2, tweet[attr])
     return coords_list
 
 
@@ -123,7 +214,7 @@ class TweetStreamListener(Stream):
         "location",
     ]
     tweet_number = 1
-    max_num_tweets_wanted = 2_000
+    max_num_tweets_wanted = 1_125_000
 
     # on success
     def on_data(self, raw_data):
@@ -132,12 +223,32 @@ class TweetStreamListener(Stream):
         max_tweets_wanted = TweetStreamListener.max_num_tweets_wanted
         if TweetStreamListener.tweet_number <= max_tweets_wanted:
             try:
-                if "text" in tweet.keys():
+                # Get text of the tweet
+                tweet_text = get_tweet_text(tweet)
+                if tweet_text:
                     attrs_to_get = TweetStreamListener.keys_wanted
-                    # Get text of the tweek
-                    tweet_text = (
-                        tweet["text"].replace("\n", "").replace("\r", "")
-                    )
+                    # Check whether tweet is a retweet (if yes, then remove
+                    # tweet 'rt' prefix)
+                    if tweet_text[:2].lower() == "rt":
+                        tweet_text = tweet_text.lstrip("rt").lstrip()
+                        retweet = "yes"
+                    else:
+                        retweet = "no"
+                    # Process the text of the tweet
+                    tweet_text = tweet_text.replace("\n", "")
+                    tweet_text = tweet_text.replace("\r", "")
+                    # Extract urls, hashtags and usernames from text of tweet
+                    (
+                        tweet_text_urls,
+                        hashtag_list,
+                        user_names_list,
+                        num_urls_in_tweet,
+                        num_users_in_tweet,
+                        num_hashtags_in_tweet,
+                        tweet_text,
+                    ) = get_special_chars_from_tweet(tweet_text)
+                    # Remove emojis from text of tweet
+                    tweet_text = remove_emoji(tweet_text)
                     # Get non-user attributes
                     message_lst = [str(tweet[kw]) for kw in attrs_to_get]
                     # Extract useful part from source
@@ -161,6 +272,13 @@ class TweetStreamListener(Stream):
                         + coords_list
                         + geo_list
                         + user_list
+                        + [retweet]
+                        + [tweet_text_urls]
+                        + [hashtag_list]
+                        + [user_names_list]
+                        + [num_urls_in_tweet]
+                        + [num_users_in_tweet]
+                        + [num_hashtags_in_tweet]
                         + [tweet_text, "\n"]
                     )
                     # Export data to local CSV
@@ -183,10 +301,14 @@ class TweetStreamListener(Stream):
                     # print to screen
                     print(
                         TweetStreamListener.tweet_number,
+                        tweet["user"]["screen_name"],
+                        retweet,
                         fhose_response["ResponseMetadata"]["HTTPStatusCode"],
                         fhose_response["RecordId"][:5],
                         tweet["created_at"].split(" +")[0],
-                        tweet_text[:60],
+                        tweet_text,
+                        tweet_text_urls,
+                        hashtag_list,
                     )
                     TweetStreamListener.tweet_number += 1
             except (AttributeError, Exception) as e:
@@ -195,7 +317,7 @@ class TweetStreamListener(Stream):
         end_time = datetime.datetime.now()
         duration = (end_time - local_time).total_seconds()
         print(
-            f"Twitter streaming ended after {duration:.3f} seconds, "
+            f"Twitter streaming ended after {duration:,.3f} seconds, "
             f"at {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
         )
         sys.exit()
@@ -358,6 +480,13 @@ if __name__ == "__main__":
         "user_contributors_enabled",
         "user_joined",
         "user_location",
+        "retweeted_tweet",
+        "tweet_text_urls",
+        "tweet_text_hashtags",
+        "tweet_text_usernames",
+        "num_urls_in_tweet_text",
+        "num_users_in_tweet_text",
+        "num_hashtags_in_tweet_text",
         "text",
     ]
 
