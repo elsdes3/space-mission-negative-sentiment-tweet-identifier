@@ -281,7 +281,7 @@ class TweetStreamListener(Stream):
                         + [num_hashtags_in_tweet]
                         + [tweet_text, "\n"]
                     )
-                    # Export data to local CSV
+                    # Export data to local CSV, if specified
                     if local_csv_fpath:
                         append_list_to_local_csv(
                             message_lst[:-1], local_csv_fpath
@@ -490,6 +490,8 @@ if __name__ == "__main__":
         "text",
     ]
 
+    # Prepare headers row in local CSV (deleting pre-existing file), if
+    # streamed dta must be written to disk locally
     if local_csv_fpath:
         if os.path.exists(local_csv_fpath):
             os.remove(local_csv_fpath)

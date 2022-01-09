@@ -71,7 +71,13 @@ def get_datetime_string() -> str:
 
 
 def get_hourly_data_metadata(
-    data_list: List, headers: List, fpath: str, get_metadata_agg: bool = False
+    data_list: List,
+    headers: List,
+    fpath: str,
+    cols_to_use: List[str],
+    unwanted_partial_strings_list: List[str],
+    combine_hashtags_usernames: bool = False,
+    get_metadata_agg: bool = False,
 ) -> List[pd.DataFrame]:
     """Load raw tweets data and file metadata into DataFrames."""
     year, month, day, hour = fpath.split("/", 3)[-1].split("/", 3)
@@ -128,16 +134,33 @@ def get_hourly_data_metadata(
         dfs.append(df_row)
     # Vertically concatenate list of DFs of data in order to get single DF of
     # tweets retrieved per hour
-    df = pd.concat(dfs, ignore_index=True).dropna()
-    # Combine tweet text with space-separated hashtags and usernames that
-    # were extracted from the text of the tweet
-    for attr_type in ["hashtags", "usernames"]:
-        df[f"{attr_type}_str"] = df.apply(
-            get_attrs_extracted_from_tweet_text, axis=1, attr_type=attr_type
-        )
-    df["text"] = df["text"] + df["hashtags_str"] + df["usernames_str"]
+    df = pd.concat(dfs, ignore_index=True)
+    # Remove tweets with sensitive partial text that are clearly unrelated to
+    # the specified search terms (this list was built up retrospectively)
+    unwanted_partial_strings = "|".join(unwanted_partial_strings_list)
+    df = df[~df["text"].str.lower().str.contains(unwanted_partial_strings)]
+    # (Optional) Combine hashtags and usernames with tweet text (if not done,
+    # then these will be completely excluded from tweet text
+    if combine_hashtags_usernames:
+        # Combine tweet text with space-separated hashtags and usernames that
+        # were extracted from the text of the tweet
+        # - eg. tweet text ('tweet text goes here') will be combined with
+        #       hashtags string ('hashtag1 hashtag2 hashtag3') and
+        #       user names string ('username1 username2 username3')
+        for attribute_type in ["hashtags", "usernames"]:
+            df[f"{attribute_type}_str"] = df.apply(
+                get_attrs_extracted_from_tweet_text,
+                axis=1,
+                attr_type=attribute_type,
+            )
+        df["text"] = df["text"] + df["hashtags_str"] + df["usernames_str"]
+    # Slice vertically concatenated data to select required columns
+    all_cols_to_use = cols_to_use + ["file_name"]
+    df = df[all_cols_to_use].dropna()
     # Vertically concatenate list of DFs of metadata in order to get single DF
     # of tweets metadata per hour
+    # - metadata will not be filtered so that we have access to statistics
+    #   about the raw data that was streamed
     df_metadata = pd.DataFrame.from_records(dfs_metadata)
     # (optional) Aggregate metadata by raw data file name
     if get_metadata_agg:
@@ -167,7 +190,7 @@ def create_folder_in_s3_bucket(
     # List all objects in S3 bucket that are inside the CSVs/ sub-folder
     folders_response_result = s3_client.list_objects_v2(
         Bucket=s3_bucket_name,
-        Prefix="datasets/twitter/kinesis-demo/csvs",
+        Prefix=f"datasets/twitter/kinesis-demo/{folder_name}",
         Delimiter="/",
     )
     # Create object (with no body), which will result in an empty folder
@@ -175,16 +198,16 @@ def create_folder_in_s3_bucket(
     # sub-folder)
     if "CommonPrefixes" in folders_response_result:
         print(
-            f"Found existing folder {folder_name} in {s3_bucket_name}. "
+            f"Found existing folder {folder_name} in specified S3 bucket. "
             "Did nothing."
         )
     else:
         proc_data_folder_creation_response = s3_client.put_object(
             Bucket=s3_bucket_name,
             Body="",
-            Key="datasets/twitter/kinesis-demo/csvs/",
+            Key=f"datasets/twitter/kinesis-demo/{folder_name}/",
         )
-        print(f"Created folder csvs in {s3_bucket_name}.")
+        print(f"Created folder {folder_name} in bucket.")
 
 
 def get_existing_csv_files_list(
@@ -220,10 +243,7 @@ def save_df_to_csv_on_s3(
     s3_client.put_object(
         Bucket=bucket_name, Body=csv_buf.getvalue(), Key=filepath
     )
-    print(
-        f"- Copied {len(df):,} rows of {df_type} to bucket {bucket_name} "
-        f"at {filepath}."
-    )
+    print(f"- Copied {len(df):,} rows of {df_type} to bucket at {filepath}.")
 
 
 def save_data_and_metadata_to_s3_csv(
@@ -234,6 +254,9 @@ def save_data_and_metadata_to_s3_csv(
     content: Dict,
     path_to_csvs_folder: str,
     region: str,
+    cols_to_use: List[str],
+    unwanted_partial_strings_list: List[str],
+    combine_hashtags_usernames: bool = False,
     aggregate_metadata: bool = False,
 ) -> None:
     """Extract tweets data and metadata and export to csvs/ in S3 bucket."""
@@ -270,6 +293,9 @@ def save_data_and_metadata_to_s3_csv(
             data_list,
             headers,
             content.get("Prefix"),
+            cols_to_use,
+            unwanted_partial_strings_list,
+            combine_hashtags_usernames,
             aggregate_metadata,
         )
         # Change datetime format in DF of data
@@ -293,4 +319,4 @@ def save_data_and_metadata_to_s3_csv(
     else:
         # Since hourly CSV exists in CSVs/ sub-folder in S3 bucket, do nothing
         fpath = existing_matching_csv_files[0]
-        print(f"Found CSV file in {fpath}. Did nothing.")
+        print(f"Found existing matching CSV file in {fpath}. Did nothing.")

@@ -1,4 +1,4 @@
-name: aws-project-name
+name: big-data-ml
 channels:
   - conda-forge
 dependencies:
@@ -10,11 +10,6 @@ dependencies:
     - papermill==2.3.3
     - numpy==1.21.2
     - pandas==1.3.3
-    - scikit-learn==1.0
-    - statsmodels==0.12.2
-    - matplotlib==3.4.3
-    - altair==4.1.0
     - python-dotenv==0.19.1
-    - fastparquet==0.7.0
-    - pyarrow==5.0.0
-    - azure-storage-blob==12.9.0
+    - emoji==1.6.1
+    - boto3==1.20.29

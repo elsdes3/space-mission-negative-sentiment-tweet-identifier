@@ -3,8 +3,8 @@
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-PROJECT_NAME = "aws-project-name"
-REPO_NAME = "aws-project-name"
+PROJECT_NAME = "big-data-ml"
+REPO_NAME = "big-data-ml"
 PYTHON_VERSION = "3.9.5"
 
 #################################################################################
@@ -92,6 +92,12 @@ aws-destroy:
 	@tox -e ci -- "destroy"
 	@python3 src/ansible/playbook_utils.py --python-version 2.7
 .PHONY: aws-destroy
+
+## Build dashboard
+dash:
+	@echo "+ $@"
+	@tox -e dash
+.PHONY: dash
 
 ## Run jupyterlab
 build:

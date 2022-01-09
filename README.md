@@ -1,13 +1,13 @@
-# aws-project-name
+# Machine Learning with Big Data
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/aws-project-name)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/aws-project-name/master/boto3_for_aws_kinesis_stream.ipynb)
-![CI](https://github.com/elsdes3/aws-project-name/actions/workflows/main.yml/badge.svg)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/big-data-ml)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/big-data-ml/master/3_combine_raw_data.ipynb)
+![CI](https://github.com/elsdes3/big-data-ml/actions/workflows/main.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
 ![OpenSource](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
-![pyup](https://pyup.io/repos/github/elsdes3/aws-project-name/shield.svg)
+![pyup](https://pyup.io/repos/github/elsdes3/big-data-ml/shield.svg)
 
 1. [Get word list](https://stackoverflow.com/a/45378529/4057186)
 2. Tutorials
@@ -25,16 +25,20 @@ https://stackoverflow.com/a/56391842/4057186
 
 ## [About](#about)
 
-A short description of the project.
+Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/index.html)) to run topic modeling (unsupervised machine learning) on [Twitter data streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/).
 
 ## [Pre-Requisites](#pre-requisites)
-1. The following environment variables should be set with the user's AWS credendials ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html))
+1. The following AWS ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html)) and [Twitter Developer API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api) credentials
    - `AWS_ACCESS_KEY_ID`
    - `AWS_SECRET_KEY`
    - `AWS_REGION`
    - `AWS_S3_BUCKET_NAME`
+   - `TWITTER_API_KEY`
+   - `TWITTER_API_KEY_SECRET`
+   - `TWITTER_ACCESS_TOKEN`
+   - `TWITTER_ACCESS_TOKEN_SECRET`
 
-   These credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
+   must be stored in a [`.env` file](https://help.pythonanywhere.com/pages/environment-variables-for-web-apps/) stored one level up from the root directory of this project.i.e. one level up from the directory containing this `README.md` file.
 
 ## [Usage](#usage)
 1. Create AWS resources
@@ -75,7 +79,7 @@ A short description of the project.
    make stream-check
    ```
    Notes
-   - there is no functionality to stop this script (it has to be stopped manually using Ctrl + C, or wait until the specified number of tweets, in `max_num_tweets_wanted` on line 126 of `twitter_s3.py`, have been retrieved)
+   - there is no functionality to stop this script (it has to be stopped manually using Ctrl + C, or wait until the specified number of tweets, in `max_num_tweets_wanted` on line 217 of `twitter_s3.py`, have been retrieved)
 
    Pre-Requisites
    - the following environment variables must be manually set, before running this script, using
@@ -96,17 +100,28 @@ A short description of the project.
 
    Pre-Requisites
    - an AWS IAM Role granting SageMaker full access to **one** pre-existing S3 bucket (the same bucket created in step 1.) must be created using the AWS console **before** running this step.
-10. Destroy AWS SageMaker resources
+10. Run quantitative analysis
+    ```bash
+    make build
+    ```
+    and run the following two notebooks in order of the numbered prefix in their name
+    - `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
+      - combines raw data into hourly CSVs
+    - `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
+      - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
+11. Destroy AWS SageMaker resources
     ```bash
     make sagemaker-destroy
     ```
-11. Destroy AWS resources
+10. Destroy AWS resources
     ```bash
     make aws-destroy
     ```
 
 ## [Notes](#notes)
 1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
+2. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
+3. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
 
 ## [Project Organization](#project-organization)
 
@@ -133,9 +148,10 @@ A short description of the project.
     |   └── processed                       <- Intermediate (transformed) data and final, canonical data sets for modeling.
     ├── 1_create_aws_resources.ipynb        <- create cloud resources on AWS
     ├── 2_create_sagemaker_resources.ipynb  <- create AWS SageMaker resources
-    ├── 3_combine_raw_data.ipynb            <- combine raw tweets data stored in S3 into CSV files
-    ├── 4_delete_aws_resources.ipynb        <- destroy cloud resources on AWS
-    ├── 5_delete_aws_resources.ipynb        <- destroy AWS cloud resources
+    ├── 3_combine_raw_data.ipynb            <- combine raw tweets data in stored in S3 into CSV files
+    ├── 4_data_processing.ipynb             <- unsupervised machine learning
+    ├── 5_delete_aws_resources.ipynb        <- destroy cloud resources on AWS
+    ├── 6_delete_aws_resources.ipynb        <- destroy AWS cloud resources
     ├── requirements.txt                    <- base packages required to execute all Jupyter notebooks (incl. jupyter)
     ├── inventories
     │   ├── production
@@ -146,28 +162,50 @@ A short description of the project.
     │   ├── __init__.py                     <- Makes src a Python module
     │   │
     │   ├── ansible                         <- Utilities to support Ansible orchestration playbooks
+    |       ├── __init__.py                 <- Makes src.ansible a Python module
     │       └── playbook_utils.py
     │   │
     │   ├── cw                              <- Scripts to manage AWS CloudWatch Log Groups and Streams
+    |       ├── __init__.py                 <- Makes src.cw a Python module
     │       └── cloudwatch_logs.py
     │   │
     │   ├── data                            <- Scripts to combine raw tweets data pre hour into a CSV file
+    |       ├── __init__.py                 <- Makes src.data a Python module
     │       └── combine_data.py
     │   │
     │   ├── ec2                             <- Scripts to manage AWS EC2 instances and security groups
+    |       ├── __init__.py                 <- Makes src.ec2 a Python module
     │       └── ec2_instances_sec_groups.py
     │   │
     │   ├── firehose                        <- Scripts to manage AWS Kinesis firehose data streams
+    |       ├── __init__.py                 <- Makes src.firehose a Python module
     │       └── kinesis_firehose.py
     │   │
     │   ├── iam                             <- Scripts to manage AWS IAM
+    |       ├── __init__.py                 <- Makes src.iam a Python module
     │       └── iam_roles.py
     │   │
     │   ├── keypairs                        <- Scripts to manage AWS EC2 SSH key pairs
+    |       ├── __init__.py                 <- Makes src.keypairs a Python module
     │       └── ssh_keypairs.py
     │   │
+    │   └── model_interpretation            <- Scripts to manage ML models
+    |       ├── __init__.py                 <- Makes src.model_interpretation a Python module
+    │       ├── import_export_models.py
+    │       └── interpret_models.py
+    │   │
+    │   └── nlp                             <- Scripts to preform NLP tasks on text data
+    |       ├── __init__.py                 <- Makes src.nlp a Python module
+    │       ├── clean_text.py
+    │   │
     │   └── s3                              <- Scripts to manage AWS S3 buckets
+    |       ├── __init__.py                 <- Makes src.s3 a Python module
+    │       ├── bucket_contents.py
     │       └── buckets.py
+    │   │
+    │   └── visualization                   <- Scripts to preform data visualization tasks
+    |       ├── __init__.py                 <- Makes src.visualization a Python module
+    │       ├── visualize.py
     │
     ├── papermill_runner.py                 <- Python functions that execute system shell commands.
     └── tox.ini                             <- tox file with settings for running tox; see https://tox.readthedocs.io/en/latest/
