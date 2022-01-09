@@ -9,13 +9,6 @@
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 ![pyup](https://pyup.io/repos/github/elsdes3/big-data-ml/shield.svg)
 
-1. [Get word list](https://stackoverflow.com/a/45378529/4057186)
-2. Tutorials
-   - [1]](https://medium.com/@the.data.yoga/creating-word2vec-embeddings-on-a-large-text-corpus-with-pyspark-469007116551)
-   - [2](https://gabefair.github.io/posts/2018/12/Understanding-Word2Vec-With-Pyspark/)
-https://stackoverflow.com/a/56390537/4057186
-https://stackoverflow.com/a/56391842/4057186
-
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
 2. [Project Organization](#project-organization)
