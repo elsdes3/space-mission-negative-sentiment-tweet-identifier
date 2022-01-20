@@ -133,7 +133,7 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
 ## [Notes](#notes)
 1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
 2. AWS resources are created and destroyed using the `boto3` AWS Python SDK. The AWS EC2 instance that is used to host the Twitter streaming (Python) code is [provisioned using Ansible playbooks](https://www.ansible.com/use-cases/provisioning).
-3. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
+3. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for the IAM user group from the AWS console, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console). For this project, this was done before creating any AWS resources using the AWS Python SDK.
 4. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
 
 ## [Project Organization](#project-organization)
