@@ -14,10 +14,11 @@
 2. [Project Organization](#project-organization)
 3. [Pre-Requisites](#pre-requisites)
 4. [Usage](#usage)
-5. [Notes](#notes)
+5. [Notebooks](#notebooks)
+6. [Notes](#notes)
+7. [Project Organization](#project-organization)
 
 ## [About](#about)
-
 Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/index.html)) to run topic modeling (unsupervised machine learning) on [Twitter data streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/).
 
 ## [Pre-Requisites](#pre-requisites)
@@ -98,10 +99,8 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
     make build
     ```
     and run the following two notebooks in order of the numbered prefix in their name
-    - `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
-      - combines raw data into hourly CSVs
-    - `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
-      - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
+    - `3_combine_raw_data.ipynb`
+    - `4_data_processing.ipynb`
 11. Destroy AWS SageMaker resources
     ```bash
     make sagemaker-destroy
@@ -110,6 +109,26 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
     ```bash
     make aws-destroy
     ```
+
+## [Notebooks](#notebooks)
+1. `1_create_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/1_create_aws_resources.ipynb))
+   - use the AWS Python SDK (`boto3` [link](https://pypi.org/project/boto3/)) to provision AWS resources
+     - [S3 storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+     - [CloudWatch Log Group and Log Stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
+     - [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html)
+     - [Kinesis Firehose Delivery Stream](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html)
+2. `2_create_sagemaker_resources` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb))
+   - use `boto3` to provision an [AWS SageMaker instance](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
+   - PySpark version 2.4.0 will be used on a [SageMaker notebook](https://docs.aws.amazon.com/sagemaker/latest/dg/nbi.html)
+3. `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
+   - combines raw data into hourly CSVs
+4. `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
+   - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
+   - this notebook **must run on the AWS SageMaker instance** [created in the `2_create_sagemaker_resources.ipynb` notebook](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb)
+5. `5_delete_sagemaker_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5_delete_sagemaker_resources.ipynb))
+   - use `boto3` to delete all AWS resources provisioned to support creation of a SageMaker instance
+6. `6_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6_delete_aws_resources.ipynb))
+   - use `boto3` to delete all AWS resources
 
 ## [Notes](#notes)
 1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
@@ -143,7 +162,7 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
     ├── 2_create_sagemaker_resources.ipynb  <- create AWS SageMaker resources
     ├── 3_combine_raw_data.ipynb            <- combine raw tweets data in stored in S3 into CSV files
     ├── 4_data_processing.ipynb             <- unsupervised machine learning
-    ├── 5_delete_aws_resources.ipynb        <- destroy cloud resources on AWS
+    ├── 5_delete_sagemaker_resources.ipynb  <- destroy AWS SageMaker resources
     ├── 6_delete_aws_resources.ipynb        <- destroy AWS cloud resources
     ├── requirements.txt                    <- base packages required to execute all Jupyter notebooks (incl. jupyter)
     ├── inventories
