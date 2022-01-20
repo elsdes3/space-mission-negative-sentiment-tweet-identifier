@@ -38,16 +38,16 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
    ```bash
    make aws-create
    ```
-   and, in
+   In this step, if the code in the [section **See EC2 Public IP Address in Ansible Inventory**](https://nbviewer.org/github/elsdes3/machine-learning-with-big-data/blob/main/1_create_aws_resources.ipynb#set-ec2-public-ip-address-in-ansible-inventory) has **not** been manually executed, then edit
    ```bash
    inventories/production/host_vars/ec2host
    ```
-   replace `...` in `ansible_host: ...` by the public IP address of the newly created EC2 instance from step 1.
+   and replace `...` in `ansible_host: ...` by the public IP address of the newly created EC2 instance from the AWS Console in the EC2 section.
 2. Provision the EC2 host, excluding Python package installation
    ```bash
    make provision-pre-python
    ```
-3. Install Python packages
+3. Install Python packages on the EC2 host
    ```bash
    make provision-post-python
    ```
