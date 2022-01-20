@@ -87,7 +87,7 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
      export TWITTER_ACCESS_TOKEN=...
      export TWITTER_ACCESS_TOKEN_SECRET=...
      ```
-9. Provision AWS SageMaker resources
+9. Create AWS SageMaker instance and related resources
    ```bash
    make sagemaker-create
    ```
@@ -112,13 +112,13 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
 
 ## [Notebooks](#notebooks)
 1. `1_create_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/1_create_aws_resources.ipynb))
-   - use the AWS Python SDK (`boto3` [link](https://pypi.org/project/boto3/)) to provision AWS resources
+   - use the AWS Python SDK (`boto3` [link](https://pypi.org/project/boto3/)) to create AWS resources
      - [S3 storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
      - [CloudWatch Log Group and Log Stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
      - [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html)
      - [Kinesis Firehose Delivery Stream](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html)
 2. `2_create_sagemaker_resources` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb))
-   - use `boto3` to provision an [AWS SageMaker instance](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
+   - use `boto3` to create an [AWS SageMaker instance](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
    - PySpark version 2.4.0 will be used on a [SageMaker notebook](https://docs.aws.amazon.com/sagemaker/latest/dg/nbi.html)
 3. `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
    - combines raw data into hourly CSVs
@@ -126,14 +126,15 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
    - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
    - this notebook **must run on the AWS SageMaker instance** [created in the `2_create_sagemaker_resources.ipynb` notebook](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb)
 5. `5_delete_sagemaker_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5_delete_sagemaker_resources.ipynb))
-   - use `boto3` to delete all AWS resources provisioned to support creation of a SageMaker instance
+   - use `boto3` to delete all AWS resources created to support creation of a SageMaker instance
 6. `6_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6_delete_aws_resources.ipynb))
    - use `boto3` to delete all AWS resources
 
 ## [Notes](#notes)
 1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
-2. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
-3. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
+2. AWS resources are created and destroyed using the `boto3` AWS Python SDK. The AWS EC2 instance that is used to host the Twitter streaming (Python) code is [provisioned using Ansible playbooks](https://www.ansible.com/use-cases/provisioning).
+3. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for an IAM user group, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console).
+4. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
 
 ## [Project Organization](#project-organization)
 
