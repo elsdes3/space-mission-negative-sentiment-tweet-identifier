@@ -11,12 +11,11 @@
 
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
-2. [Project Organization](#project-organization)
-3. [Pre-Requisites](#pre-requisites)
-4. [Usage](#usage)
-5. [Notebooks](#notebooks)
-6. [Notes](#notes)
-7. [Project Organization](#project-organization)
+2. [Pre-Requisites](#pre-requisites)
+3. [Usage](#usage)
+4. [Notebooks](#notebooks)
+5. [Notes](#notes)
+6. [Project Organization](#project-organization)
 
 ## [About](#about)
 Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/index.html)) to run topic modeling (unsupervised machine learning) on [Twitter data streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/).
@@ -121,13 +120,20 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
    - use `boto3` to create an [AWS SageMaker instance](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
    - PySpark version 2.4.0 will be used on a [SageMaker notebook](https://docs.aws.amazon.com/sagemaker/latest/dg/nbi.html)
 3. `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
-   - combines raw data into hourly CSVs
-4. `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
+   - combines raw data in the S3 bucket into hourly CSVs
+     - since each hour of data files were small enough to read into a single data object (DataFrame), in-memory tools were used to combine each hourly folder of streamed data into a single CSV
+   - filters out unwanted tweets based on a list of words that are not relevant to the subject of this project
+4. `3_1_combine_raw_data_pyspark.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_1_combine_raw_data_pyspark.ipynb))
+   - combines all raw data in the S3 bucket using PySpark and Databricks
+     - files in all hourly folders were loaded into a single Spark DataFrame
+   - uses only Spark DataFrame methods to filter out unwanted tweets
+   - this notebook **must be run on Databricks**
+5. `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
    - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
    - this notebook **must run on the AWS SageMaker instance** [created in the `2_create_sagemaker_resources.ipynb` notebook](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb)
-5. `5_delete_sagemaker_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5_delete_sagemaker_resources.ipynb))
+6. `5_delete_sagemaker_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5_delete_sagemaker_resources.ipynb))
    - use `boto3` to delete all AWS resources created to support creation of a SageMaker instance
-6. `6_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6_delete_aws_resources.ipynb))
+7. `6_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6_delete_aws_resources.ipynb))
    - use `boto3` to delete all AWS resources
 
 ## [Notes](#notes)
