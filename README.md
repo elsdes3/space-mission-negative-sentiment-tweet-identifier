@@ -1,4 +1,4 @@
-# Machine Learning with Big Data
+# Machine Learning to Identify Negative Sentiment Tweets about JWST Mission
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/big-data-ml)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/big-data-ml/master/3_combine_raw_data.ipynb)
@@ -18,7 +18,30 @@
 6. [Project Organization](#project-organization)
 
 ## [About](#about)
-Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/index.html)) to run topic modeling (unsupervised machine learning) on [Twitter data streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/).
+This project trains a binary ML classification model to classify sentiment in tweets regarding the James Webb Space Telescope (JWST) mission, that were posted between December 30, 2021 and January 10, 2022. The model predicts if tweets
+- need support
+  - this is the minority class
+  - corresponds to negative and neutral sentiment tweets
+- do not need support
+  - this is the majority class
+  - corresponds to positive sentiment tweets
+
+from the mission support/communications team.
+
+Tweets were [streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/) and then
+- combined by date and hour
+- filtered to only capture tweets relating to the mission
+- processed text in the tweets using text-processing via [PySpark](https://spark.apache.org/docs/latest/api/python/index.html)
+- divided into training, validation and testing splits
+- used to [fine-tune](https://huggingface.co/docs/transformers/training#train-in-native-pytorch) a [pre-trained transformers model](https://huggingface.co/docs/transformers/index#transformers) to predict the above-mentioned binary outcome - if tweets needs support or not
+
+The value of using a ML-based approach to flag tweets needing support was estimated by calculating how much time would be
+- missed
+- wasted
+
+if the fine-tuned transformer model was used to predict if tweets in the test split needed support or not compared to the corresponding predictions made using an alternative naive approach that did not use ML (i.e. randomly guessing if tweets needed support). The ML-based approach was shown deliver value by reducing time missed and time wasted compared to the non-ML (naive, random guessing) approach to predicting if tweets needed support or not.
+
+For full details about the background, motivation and implementation overview, please see the [full project scope](https://github.com/elsdes3/big-data-ml/master/).
 
 ## [Pre-Requisites](#pre-requisites)
 1. The following AWS ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html)) and [Twitter Developer API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api) credentials
@@ -36,7 +59,7 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
 ## [Usage](#usage)
 1. Create AWS resources
    ```bash
-   make aws-create
+   make -f Makefile-stream aws-create
    ```
    In this step, if the code in the [section **See EC2 Public IP Address in Ansible Inventory**](https://nbviewer.org/github/elsdes3/machine-learning-with-big-data/blob/main/1_create_aws_resources.ipynb#set-ec2-public-ip-address-in-ansible-inventory) has **not** been manually executed, then edit
    ```bash
@@ -45,37 +68,35 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
    and replace `...` in `ansible_host: ...` by the public IP address of the newly created EC2 instance from the AWS Console in the EC2 section.
 2. Provision the EC2 host, excluding Python package installation
    ```bash
-   make provision-pre-python
+   make -f Makefile-stream provision-pre-python
    ```
 3. Install Python packages on the EC2 host
    ```bash
-   make provision-post-python
+   make -f Makefile-stream provision-post-python
    ```
 4. Start the Twitter streaming script locally
    ```bash
-   make stream-local-start
+   make -f Makefile-stream stream-local-start
    ```
 5. Stop the Twitter streaming script running locally
    ```bash
-   make stream-local-stop
+   make -f Makefile-stream stream-local-stop
    ```
 6. Start the Twitter streaming script on the EC2 instance
    ```bash
-   make stream-start
+   make -f Makefile-stream stream-start
    ```
 7. Stop the Twitter streaming script running on the EC2 instance
    ```bash
-   make stream-stop
+   make -f Makefile-stream stream-stop
    ```
-8. Run the Twitter streaming script locally, saving to a local CSV file but not to S3
+8. () Run the Twitter streaming script locally, saving to a local CSV file but not to S3
    ```bash
-   make stream-check
+   make -f Makefile-stream stream-check
    ```
-   Notes
-   - there is no functionality to stop this script (it has to be stopped manually using Ctrl + C, or wait until the specified number of tweets, in `max_num_tweets_wanted` on line 217 of `twitter_s3.py`, have been retrieved)
 
    Pre-Requisites
-   - the following environment variables must be manually set, before running this script, using
+   - the eight environment variables listed above must be manually set, before running this script, using
      ```bash
      export AWS_ACCESS_KEY_ID=...
      export AWS_SECRET_ACCESS_KEY=...
@@ -86,25 +107,35 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
      export TWITTER_ACCESS_TOKEN=...
      export TWITTER_ACCESS_TOKEN_SECRET=...
      ```
-9. Create AWS SageMaker instance and related resources
-   ```bash
-   make sagemaker-create
+9. Combine data (tweets) by hour
+   ```base
+   make combine-data combine-data-logs
    ```
-
-   Pre-Requisites
-   - an AWS IAM Role granting SageMaker full access to **one** pre-existing S3 bucket (the same bucket created in step 1.) must be created using the AWS console **before** running this step.
-10. Run quantitative analysis
-    ```bash
-    make build
+10. Combine data (tweets) by hour
+    ```base
+    make combine-data combine-data-logs
     ```
-    and run the following two notebooks in order of the numbered prefix in their name
-    - `3_combine_raw_data.ipynb`
-    - `4_data_processing.ipynb`
-11. Destroy AWS SageMaker resources
-    ```bash
-    make sagemaker-destroy
+11. Filter hourly data (tweets) to remove unwanted / irrelevant tweets
+    ```base
+    make filter-data filter-data-logs
     ```
-10. Destroy AWS resources
+12. Process text of *all* filtered data (tweets)
+    ```base
+    make process-data process-data-logs
+    ```
+13. Split data
+    ```base
+    make split-data split-data-logs
+    ```
+14. Fine-tune pre-trained model
+    ```base
+    make train train-logs
+    ```
+15. Evaluate prediction probabilities on unseen data
+    ```base
+    make inference inference-logs
+    ```
+16. Destroy AWS resources
     ```bash
     make aws-destroy
     ```
@@ -116,31 +147,34 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
      - [CloudWatch Log Group and Log Stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
      - [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html)
      - [Kinesis Firehose Delivery Stream](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html)
-2. `2_create_sagemaker_resources` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb))
-   - use `boto3` to create an [AWS SageMaker instance](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html)
-   - PySpark version 2.4.0 will be used on a [SageMaker notebook](https://docs.aws.amazon.com/sagemaker/latest/dg/nbi.html)
-3. `3_combine_raw_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_combine_raw_data.ipynb))
-   - combines raw data in the S3 bucket into hourly CSVs
-     - since each hour of data files were small enough to read into a single data object (DataFrame), in-memory tools were used to combine each hourly folder of streamed data into a single CSV
+2. `3_combine_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3-combine-data/3_combine_data.ipynb))
+   - combines raw data (streamed tweets) by hour
+   - since each hour of data files were small enough to read into a single data object (DataFrame), in-memory tools were used to combine each hourly folder of streamed data
+3. `4_filter_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4-filter-data/4_filter_data.ipynb))
+   - filter hourly tweets to remove tweets unrelated to the JWST mission
    - filters out unwanted tweets based on a list of words that are not relevant to the subject of this project
-4. `3_1_combine_raw_data_pyspark.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3_1_combine_raw_data_pyspark.ipynb))
-   - combines all raw data in the S3 bucket using PySpark and Databricks
-     - files in all hourly folders were loaded into a single Spark DataFrame
-   - uses only Spark DataFrame methods to filter out unwanted tweets
-   - this notebook **must be run on Databricks**
-5. `4_data_processing.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4_data_processing.ipynb))
-   - perform topic modeling (unsupervised machine learning) on combined hourly CSVs using PySpark and PySparkML
-   - this notebook **must run on the AWS SageMaker instance** [created in the `2_create_sagemaker_resources.ipynb` notebook](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_create_sagemaker_resources.ipynb)
-6. `5_delete_sagemaker_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5_delete_sagemaker_resources.ipynb))
-   - use `boto3` to delete all AWS resources created to support creation of a SageMaker instance
-7. `6_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6_delete_aws_resources.ipynb))
-   - use `boto3` to delete all AWS resources
+4. `5_process_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5-process-data/5_process_data.ipynb))
+   - processes text in *all* filtered tweets using PySpark string manipulation methods
+5. `6_split_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6-split-data/6_split_data.ipynb))
+   - divide processed data into training, validation and testing splits
+6. `7_train.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/7-train/7_train.ipynb))
+   - fine-tune pre-trained transformers model to flag tweets that need and do not need support
+   - pre-trained model is trained using training and validation split
+   - fine-tuned model is then exported to disk and evaluated using test split
+     - model evaluation is performed using ML and business metrics
+7. `8_inference.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/8-inference/8_inference.ipynb))
+   - trends in fine-tuned model's probabilistic predictions are examined in order to compare the same after re-training in production
+   - this is necessary in order to ensure model performs as expected in production, when making inference predictions
 
 ## [Notes](#notes)
-1. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
-2. AWS resources are created and destroyed using the `boto3` AWS Python SDK. The AWS EC2 instance that is used to host the Twitter streaming (Python) code is [provisioned using Ansible playbooks](https://www.ansible.com/use-cases/provisioning).
-3. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for the IAM user group from the AWS console, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console). For this project, this was done before creating any AWS resources using the AWS Python SDK.
-4. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
+1. When running the script locally (step 8. from **Usage** above), there is no functionality to stop the `twitter_s3.py` script. It has to be stopped manually by
+   - pressing <kbd>Ctrl</kbd> + <kbd>C</kbd>
+   - waiting until the specified number of tweets in `max_num_tweets_wanted` on line 217 of `twitter_s3.py`, have been streamed
+2. Running the notebooks to create and destroy AWS resources in a non-interactive approach has not been verified. It is not currently known if this is possible.
+3. AWS resources are created and destroyed using the `boto3` AWS Python SDK. The AWS EC2 instance that is used to host the Twitter streaming (Python) code is [provisioned using Ansible playbooks](https://www.ansible.com/use-cases/provisioning).
+4. The AWS credentials must be associated to a user group whose users have been granted programmatic access to AWS resources. In order to configure this for the IAM user group from the AWS console, see the documentation [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html#id_users_create_console). For this project, this was done before creating any AWS resources using the AWS Python SDK.
+5. The Twitter credentials must be for a user account with [elevated access](https://developer.twitter.com/en/support/twitter-api/v2) to the Twitter Developer API.
+6. Data used for this project was collected between December 30, 2021 and January 10, 2022.
 
 ## [Project Organization](#project-organization)
 
@@ -151,7 +185,9 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
     │   ├── workflows
     │       └── main.yml                    <- configuration file for CI build on Github Actions
     ├── Makefile                            <- Makefile with commands like `make lint` or `make build`
+    ├── Makefile-stream                     <- Makefile for streaming tweets
     ├── README.md                           <- The top-level README for developers using this project.
+    ├── scoping.md                          <- Project scope.
     ├── ansible.cfg                         <- configuration file for Ansible
     ├── environment.yml                     <- configuration file to create environment to run project on Binder
     ├── manage_host.yml                     <- manage provisioning of EC2 host
@@ -160,74 +196,22 @@ Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/in
     ├── stream_twitter.yml                  <- stream Twitter data on EC2 instance
     ├── twitter_s3.py                       <- Python script to stream Twitter data locally or on EC2 instance
     ├── variables_run.yaml                  <- Ansible playbook variables
-    ├── executed_notebooks
-    |   └── *.ipynb                         <- executed notebooks, with output and execution datetime suffix in filename
+    ├── tox.ini                             <- tox file with settings for running tox; see https://tox.readthedocs.io/en/latest/
+    ├── utils.sh                            <- shell convenience utilities when caling `make`
     ├── data
     │   ├── raw                             <- The original, immutable data dump.
     |   └── processed                       <- Intermediate (transformed) data and final, canonical data sets for modeling.
-    ├── 1_create_aws_resources.ipynb        <- create cloud resources on AWS
-    ├── 2_create_sagemaker_resources.ipynb  <- create AWS SageMaker resources
-    ├── 3_combine_raw_data.ipynb            <- combine raw tweets data in stored in S3 into CSV files
-    ├── 4_data_processing.ipynb             <- unsupervised machine learning
-    ├── 5_delete_sagemaker_resources.ipynb  <- destroy AWS SageMaker resources
-    ├── 6_delete_aws_resources.ipynb        <- destroy AWS cloud resources
-    ├── requirements.txt                    <- base packages required to execute all Jupyter notebooks (incl. jupyter)
+    ├── notebooks                           <- Jupyter notebooks. Naming convention is a number (for ordering),
+    │                                          the creator's initials, and a short `-` delimited description, e.g.
+    │                                          `1.0-jqp-initial-data-exploration`.
     ├── inventories
     │   ├── production
     │       ├── host_vars                   <- variables to inject into Ansible playbooks, per target host
     │           └── ec2_host
     |       └── hosts                       <- Ansible inventory
-    ├── src                                 <- Source code for use in this project.
-    │   ├── __init__.py                     <- Makes src a Python module
-    │   │
-    │   ├── ansible                         <- Utilities to support Ansible orchestration playbooks
-    |       ├── __init__.py                 <- Makes src.ansible a Python module
-    │       └── playbook_utils.py
-    │   │
-    │   ├── cw                              <- Scripts to manage AWS CloudWatch Log Groups and Streams
-    |       ├── __init__.py                 <- Makes src.cw a Python module
-    │       └── cloudwatch_logs.py
-    │   │
-    │   ├── data                            <- Scripts to combine raw tweets data pre hour into a CSV file
-    |       ├── __init__.py                 <- Makes src.data a Python module
-    │       └── combine_data.py
-    │   │
-    │   ├── ec2                             <- Scripts to manage AWS EC2 instances and security groups
-    |       ├── __init__.py                 <- Makes src.ec2 a Python module
-    │       └── ec2_instances_sec_groups.py
-    │   │
-    │   ├── firehose                        <- Scripts to manage AWS Kinesis firehose data streams
-    |       ├── __init__.py                 <- Makes src.firehose a Python module
-    │       └── kinesis_firehose.py
-    │   │
-    │   ├── iam                             <- Scripts to manage AWS IAM
-    |       ├── __init__.py                 <- Makes src.iam a Python module
-    │       └── iam_roles.py
-    │   │
-    │   ├── keypairs                        <- Scripts to manage AWS EC2 SSH key pairs
-    |       ├── __init__.py                 <- Makes src.keypairs a Python module
-    │       └── ssh_keypairs.py
-    │   │
-    │   └── model_interpretation            <- Scripts to manage ML models
-    |       ├── __init__.py                 <- Makes src.model_interpretation a Python module
-    │       ├── import_export_models.py
-    │       └── interpret_models.py
-    │   │
-    │   └── nlp                             <- Scripts to preform NLP tasks on text data
-    |       ├── __init__.py                 <- Makes src.nlp a Python module
-    │       ├── clean_text.py
-    │   │
-    │   └── s3                              <- Scripts to manage AWS S3 buckets
-    |       ├── __init__.py                 <- Makes src.s3 a Python module
-    │       ├── bucket_contents.py
-    │       └── buckets.py
-    │   │
-    │   └── visualization                   <- Scripts to preform data visualization tasks
-    |       ├── __init__.py                 <- Makes src.visualization a Python module
-    │       ├── visualize.py
-    │
-    ├── papermill_runner.py                 <- Python functions that execute system shell commands.
-    └── tox.ini                             <- tox file with settings for running tox; see https://tox.readthedocs.io/en/latest/
+    ├── v1                                  <- previous version of project - topic modeling using big-data tools only
+    ├── src                                 <- Source code for use in this project
+    │   └── __init__.py                     <- Makes src a Python module
 
 --------
 

@@ -2,6 +2,11 @@
 # GLOBALS                                                                       #
 #################################################################################
 
+PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+PROJECT_NAME = "big-data-ml"
+REPO_NAME = "big-data-ml"
+PYTHON_VERSION = "3.9.5"
+
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
@@ -13,137 +18,92 @@ lint:
 	@tox -e lint
 .PHONY: lint
 
-## Run combine data service
-combine-data:
+## Remove Python artifacts
+clean-py:
 	@echo "+ $@"
-	@docker compose up combine-data --detach
-.PHONY: combine-data
+	@find ./src -type f -name "*.py[co]" -delete
+	@find ./src -type d -name "__pycache__" -delete
+.PHONY: clean-py
 
-## Run filter data service
-filter-data:
+## Create AWS resources
+aws-create:
 	@echo "+ $@"
-	@docker compose up filter-data --detach
-.PHONY: filter-data
+	@tox -e ci -- "create"
+.PHONY: aws-create
 
-## Run process data service
-process-data:
+## Create AWS SageMaker resources
+aws-sagemaker-create:
 	@echo "+ $@"
-	@docker compose up process-data --detach
-.PHONY: process-data
+	@tox -e ci -- "sagemaker-create"
+.PHONY: aws-sagemaker-create
 
-## Run split data service
-split-data:
+## Provision EC2 instance, excluding Python pkg installation
+provision-pre-python:
 	@echo "+ $@"
-	@docker compose up split-data --detach
-.PHONY: split-data
+	@tox -e provision -- "pre-python"
+.PHONY: provision-pre-python
 
-## Run train service
-train:
+## Install Python packages on EC2 instance
+provision-post-python:
 	@echo "+ $@"
-	@docker compose up train --detach
-.PHONY: train
+	@python3 src/ansible/playbook_utils.py --python-version 3
+	@tox -e provision -- "post-python"
+.PHONY: provision-post-python
 
-## Run inference service
-inference:
+## Stream Twitter data on EC2 instance
+stream-start:
 	@echo "+ $@"
-	@docker compose up inference --detach
-.PHONY: inference
+	@tox -e stream -- --target-type="ec2"
+.PHONY: stream-start
 
-## Run assessment service
-assess:
+## Stop Stream of Twitter data on EC2 instance
+stream-stop:
 	@echo "+ $@"
-	@docker compose up assess --detach
-.PHONY: assess
+	@tox -e stream -- --tag="stop" --target-type="ec2"
+.PHONY: stream-stop
 
-## Get logs for combine data service
-combine-data-logs:
+## Stream Twitter data locally, without saving to CSV or to S3 via Firehose
+stream-local-start:
 	@echo "+ $@"
-	@./utils.sh "combine-data"
-.PHONY: combine-data-logs
+	@tox -e stream
+.PHONY: stream-local-start
 
-## Get logs for filter data service
-filter-data-logs:
+## Stop Stream of Twitter data locally
+stream-local-stop:
 	@echo "+ $@"
-	@./utils.sh "filter-data"
-.PHONY: filter-data-logs
+	@tox -e stream -- --tag="stop"
+.PHONY: stream-local-stop
 
-## Get logs for process data service
-process-data-logs:
+## Directly run Stream of Twitter data locally
+stream-check:
 	@echo "+ $@"
-	@./utils.sh "process-data"
-.PHONY: process-data-logs
+	@tox -e stream_check
+.PHONY: stream-check
 
-## Get logs for split data service
-split-data-logs:
+## Delete AWS SageMaker resources
+aws-sagemaker-delete:
 	@echo "+ $@"
-	@./utils.sh "split-data"
-.PHONY: split-data-logs
+	@tox -e ci -- "sagemaker-delete"
+.PHONY: aws-sagemaker-delete
 
-## Get logs for train service
-train-logs:
+## Destroy AWS resources
+aws-destroy:
 	@echo "+ $@"
-	@./utils.sh "train"
-.PHONY: train-logs
+	@tox -e ci -- "destroy"
+	@python3 src/ansible/playbook_utils.py --python-version 2.7
+.PHONY: aws-destroy
 
-## Get logs for inference service
-inference-logs:
+## Build dashboard
+dash:
 	@echo "+ $@"
-	@./utils.sh "inference"
-.PHONY: inference-logs
+	@tox -e dash
+.PHONY: dash
 
-## Get logs for assessment service
-assess-logs:
+## Run jupyterlab
+build:
 	@echo "+ $@"
-	@./utils.sh "assess"
-.PHONY: assess-logs
-
-## Remove Service(s)
-down:
-	@echo "+ $@"
-	@docker compose down
-.PHONY: down
-
-## Cleanup combine-data service
-reset-combine-data:
-	@echo "+ $@"
-	@./utils.sh "reset-combine-data"
-.PHONY: reset-combine-data
-
-## Cleanup filter-data service
-reset-filter-data:
-	@echo "+ $@"
-	@./utils.sh "reset-filter-data"
-.PHONY: reset-filter-data
-
-## Cleanup process-data service
-reset-process-data:
-	@echo "+ $@"
-	@./utils.sh "reset-process-data"
-.PHONY: reset-process-data
-
-## Cleanup split-data service
-reset-split-data:
-	@echo "+ $@"
-	@./utils.sh "reset-split-data"
-.PHONY: reset-split-data
-
-## Cleanup train service
-reset-train:
-	@echo "+ $@"
-	@./utils.sh "reset-train"
-.PHONY: reset-train
-
-## Cleanup inference service
-reset-inference:
-	@echo "+ $@"
-	@./utils.sh "reset-inference"
-.PHONY: reset-inference
-
-## Cleanup assessment service
-reset-assess:
-	@echo "+ $@"
-	@./utils.sh "reset-assess"
-.PHONY: reset-assess
+	@tox -e build
+.PHONY: build
 
 #################################################################################
 # PROJECT RULES                                                                 #

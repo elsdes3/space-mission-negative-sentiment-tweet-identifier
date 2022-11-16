@@ -1,0 +1,22 @@
+name: split-data
+dependencies:
+  - python=3.10
+  - pip==22.3
+  - pip:
+    - nb_black==1.0.7
+    - boto3
+    - s3fs
+    - Jinja2==3.1.2
+    - tweepy==4.10.1
+    - pandas==1.5.1
+    - openpyxl==3.0.10
+    - scikit-learn==1.1.3
+    - distributed==2022.10.1
+    - dask[dataframe]==2022.10.1
+    - dask[distributed]==2022.10.1
+  - conda==4.3.16
+  - conda:
+    - ipykernel==6.16.2
+    - pyarrow==9.0.0
+    - fastparquet==0.8.3
+    - dask-ml==2022.5.27
