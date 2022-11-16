@@ -4,7 +4,7 @@ services:
   combine-data:
     container_name: combine-data
     build:
-      context: ./3-combine-data
+      context: ./notebooks/3-combine-data
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -14,14 +14,14 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./3-combine-data/notebooks:/home/jovyan/notebooks
+      - ./notebooks/3-combine-data/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./data:/home/jovyan/data
 
   filter-data:
     container_name: filter-data
     build:
-      context: ./4-filter-data
+      context: ./notebooks/4-filter-data
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -31,14 +31,14 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./4-filter-data/notebooks:/home/jovyan/notebooks
+      - ./notebooks/4-filter-data/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./data:/home/jovyan/data
 
   process-data:
     container_name: process-data
     build:
-      context: ./5-process-data
+      context: ./notebooks/5-process-data
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -48,14 +48,14 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./5-process-data/notebooks:/home/jovyan/notebooks
+      - ./notebooks/5-process-data/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./data:/home/jovyan/data
 
   split-data:
     container_name: split-data
     build:
-      context: ./6-split-data
+      context: ./notebooks/6-split-data
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -65,14 +65,14 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./6-split-data/notebooks:/home/jovyan/notebooks
+      - ./notebooks/6-split-data/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./data:/home/jovyan/data
 
   train:
     container_name: train
     build:
-      context: ./7-train
+      context: ./notebooks/7-train
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -82,7 +82,7 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./7-train/notebooks:/home/jovyan/notebooks
+      - ./notebooks/7-train/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./model-fine-tuned:/home/jovyan/model-fine-tuned
       - ./data:/home/jovyan/data
@@ -90,7 +90,7 @@ services:
   inference:
     container_name: inference
     build:
-      context: ./8-inference
+      context: ./notebooks/8-inference
       dockerfile: Dockerfile
     restart: 'no'
     ports:
@@ -100,24 +100,7 @@ services:
       NB_UID: 1000
       NB_GID: 1000
     volumes:
-      - ./8-inference/notebooks:/home/jovyan/notebooks
+      - ./notebooks/8-inference/notebooks:/home/jovyan/notebooks
       - ./src:/home/jovyan/src
       - ./model-fine-tuned:/home/jovyan/model-fine-tuned
-      - ./data:/home/jovyan/data
-
-  assess:
-    container_name: assess
-    build:
-      context: ./9-assess
-      dockerfile: Dockerfile
-    restart: 'no'
-    ports:
-      - 8894:8888
-    env_file: ${HOME}/Downloads/.env
-    environment:
-      NB_UID: 1000
-      NB_GID: 1000
-    volumes:
-      - ./9-assess/notebooks:/home/jovyan/notebooks
-      - ./src:/home/jovyan/src
       - ./data:/home/jovyan/data

@@ -49,12 +49,6 @@ inference:
 	@docker compose up inference --detach
 .PHONY: inference
 
-## Run assessment service
-assess:
-	@echo "+ $@"
-	@docker compose up assess --detach
-.PHONY: assess
-
 ## Get logs for combine data service
 combine-data-logs:
 	@echo "+ $@"
@@ -90,12 +84,6 @@ inference-logs:
 	@echo "+ $@"
 	@./utils.sh "inference"
 .PHONY: inference-logs
-
-## Get logs for assessment service
-assess-logs:
-	@echo "+ $@"
-	@./utils.sh "assess"
-.PHONY: assess-logs
 
 ## Remove Service(s)
 down:
@@ -138,12 +126,6 @@ reset-inference:
 	@echo "+ $@"
 	@./utils.sh "reset-inference"
 .PHONY: reset-inference
-
-## Cleanup assessment service
-reset-assess:
-	@echo "+ $@"
-	@./utils.sh "reset-assess"
-.PHONY: reset-assess
 
 #################################################################################
 # PROJECT RULES                                                                 #

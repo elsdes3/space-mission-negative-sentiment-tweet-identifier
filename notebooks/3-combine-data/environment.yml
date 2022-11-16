@@ -1,16 +1,16 @@
 name: combine-data
 dependencies:
   - python=3.10
-  - pip==22.2.2
+  - pip==22.3
   - pip:
     - nb_black==1.0.7
     - boto3
     - s3fs
     - Jinja2==3.1.2
-    - pandas==1.5.0
+    - pandas==1.5.1
     - openpyxl==3.0.10
-    - pyarrow==9.0.0
-    - fastparquet==0.8.3
   - conda==4.3.16
   - conda:
-    - ipykernel==6.16.0
+    - ipykernel==6.16.2
+    - pyarrow==9.0.0
+    - fastparquet==0.8.3
