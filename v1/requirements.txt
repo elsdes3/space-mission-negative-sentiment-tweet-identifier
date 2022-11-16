@@ -4,4 +4,4 @@ openpyxl==3.0.10
 altair==4.2.0
 python-dotenv==0.21.0
 emoji==2.1.0
-boto3==1.24.81
+boto3==1.26.11
