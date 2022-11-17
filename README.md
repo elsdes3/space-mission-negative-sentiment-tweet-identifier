@@ -1,13 +1,13 @@
 # Machine Learning to Identify Negative Sentiment Tweets about JWST Mission
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/big-data-ml)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/big-data-ml/master/3_combine_raw_data.ipynb)
-![CI](https://github.com/elsdes3/big-data-ml/actions/workflows/main.yml/badge.svg)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/elsdes3/space-mission-negative-sentiment-tweet-identifier)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/master/3_combine_raw_data.ipynb)
+![CI](https://github.com/elsdes3/space-mission-negative-sentiment-tweet-identifier/actions/workflows/main.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
 ![OpenSource](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
-![pyup](https://pyup.io/repos/github/elsdes3/big-data-ml/shield.svg)
+![pyup](https://pyup.io/repos/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/shield.svg)
 
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
@@ -41,7 +41,7 @@ The value of using a ML-based approach to flag tweets needing support was estima
 
 if the fine-tuned transformer model was used to predict if tweets in the test split needed support or not compared to the corresponding predictions made using an alternative naive approach that did not use ML (i.e. randomly guessing if tweets needed support). The ML-based approach was shown deliver value by reducing time missed and time wasted compared to the non-ML (naive, random guessing) approach to predicting if tweets needed support or not.
 
-For full details about the background, motivation and implementation overview, please see the [full project scope](https://github.com/elsdes3/big-data-ml/master/).
+For full details about the background, motivation and implementation overview, please see the [full project scope](https://github.com/elsdes3/space-mission-negative-sentiment-tweet-identifier/master/).
 
 ## [Pre-Requisites](#pre-requisites)
 1. The following AWS ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html)) and [Twitter Developer API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api) credentials
@@ -141,30 +141,30 @@ For full details about the background, motivation and implementation overview, p
     ```
 
 ## [Notebooks](#notebooks)
-1. `1_create_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/1_create_aws_resources.ipynb))
+1. `1_create_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/1_create_aws_resources.ipynb))
    - use the AWS Python SDK (`boto3` [link](https://pypi.org/project/boto3/)) to create AWS resources
      - [S3 storage bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
      - [CloudWatch Log Group and Log Stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
      - [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html)
      - [Kinesis Firehose Delivery Stream](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html)
-2. `2_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_delete_aws_resources.ipynb))
+2. `2_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/2_delete_aws_resources.ipynb))
    - use `boto3` to delete all AWS resources
-3. `3_combine_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/3-combine-data/notebooks/3_combine_data.ipynb))
+3. `3_combine_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/3-combine-data/notebooks/3_combine_data.ipynb))
    - combines raw data (streamed tweets) by hour
    - since each hour of data files were small enough to read into a single data object (DataFrame), in-memory tools were used to combine each hourly folder of streamed data
-4. `4_filter_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/4-filter-data/notebooks/4_filter_data.ipynb))
+4. `4_filter_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/4-filter-data/notebooks/4_filter_data.ipynb))
    - filter hourly tweets to remove tweets unrelated to the JWST mission
    - filters out unwanted tweets based on a list of words that are not relevant to the subject of this project
-5. `5_process_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/5-process-data/notebooks/5_process_data.ipynb))
+5. `5_process_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/5-process-data/notebooks/5_process_data.ipynb))
    - processes text in *all* filtered tweets using PySpark string manipulation methods
-6. `6_split_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/6-split-data/notebooks/6_split_data.ipynb))
+6. `6_split_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/6-split-data/notebooks/6_split_data.ipynb))
    - divide processed data into training, validation and testing splits
-7. `7_train.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/7-train/notebooks/7_train.ipynb))
+7. `7_train.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/7-train/notebooks/7_train.ipynb))
    - fine-tune pre-trained transformers model to flag tweets that need and do not need support
    - pre-trained model is trained using training and validation split
    - fine-tuned model is then exported to disk and evaluated using test split
      - model evaluation is performed using ML and business metrics
-8. `8_inference.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/8-inference/notebooks/8_inference.ipynb))
+8. `8_inference.ipynb` ([view](https://nbviewer.org/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/notebooks/8-inference/notebooks/8_inference.ipynb))
    - trends in fine-tuned model's probabilistic predictions are examined in order to compare the same after re-training in production
    - this is necessary in order to ensure model performs as expected in production, when making inference predictions
 
