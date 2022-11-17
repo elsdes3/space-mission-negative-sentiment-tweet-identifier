@@ -17,6 +17,9 @@
 5. [Notes](#notes)
 6. [Project Organization](#project-organization)
 
+## Github Description
+Topic Modeling (Unsupervised ML) on Tweets about Space news, streamed using the Twitter Streaming API with AWS Kinesis Firehose and modeled using PySparkML on AWS SageMaker.
+
 ## [About](#about)
 Use big-data tools ([PySpark](https://spark.apache.org/docs/latest/api/python/index.html)) to run topic modeling (unsupervised machine learning) on [Twitter data streamed](https://developer.twitter.com/en/docs/tutorials/stream-tweets-in-real-time) using [AWS Kinesis Firehose](https://aws.amazon.com/kinesis/data-firehose/).
 
