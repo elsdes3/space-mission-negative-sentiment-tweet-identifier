@@ -81,6 +81,9 @@ data/interim/*
 data/processed/*
 data/external/*
 
+# NLP transformers model dir after fine-tuning
+model-fine-tuned/
+
 # gitkeep files
 !.gitkeep
 

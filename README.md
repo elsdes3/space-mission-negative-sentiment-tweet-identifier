@@ -90,7 +90,7 @@ For full details about the background, motivation and implementation overview, p
    ```bash
    make -f Makefile-stream stream-stop
    ```
-8. () Run the Twitter streaming script locally, saving to a local CSV file but not to S3
+8. (optional) Run the Twitter streaming script locally, saving to a local CSV file but not to S3
    ```bash
    make -f Makefile-stream stream-check
    ```
@@ -137,7 +137,7 @@ For full details about the background, motivation and implementation overview, p
     ```
 16. Destroy AWS resources
     ```bash
-    make aws-destroy
+    make -f Makefile-stream aws-destroy
     ```
 
 ## [Notebooks](#notebooks)
@@ -147,22 +147,24 @@ For full details about the background, motivation and implementation overview, p
      - [CloudWatch Log Group and Log Stream](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatchLogsConcepts.html)
      - [IAM Role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_terms-and-concepts.html)
      - [Kinesis Firehose Delivery Stream](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html)
-2. `3_combine_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/3-combine-data/3_combine_data.ipynb))
+2. `2_delete_aws_resources.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/2_delete_aws_resources.ipynb))
+   - use `boto3` to delete all AWS resources
+3. `3_combine_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/3-combine-data/notebooks/3_combine_data.ipynb))
    - combines raw data (streamed tweets) by hour
    - since each hour of data files were small enough to read into a single data object (DataFrame), in-memory tools were used to combine each hourly folder of streamed data
-3. `4_filter_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/4-filter-data/4_filter_data.ipynb))
+4. `4_filter_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/4-filter-data/notebooks/4_filter_data.ipynb))
    - filter hourly tweets to remove tweets unrelated to the JWST mission
    - filters out unwanted tweets based on a list of words that are not relevant to the subject of this project
-4. `5_process_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/5-process-data/5_process_data.ipynb))
+5. `5_process_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/5-process-data/notebooks/5_process_data.ipynb))
    - processes text in *all* filtered tweets using PySpark string manipulation methods
-5. `6_split_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/6-split-data/6_split_data.ipynb))
+6. `6_split_data.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/6-split-data/notebooks/6_split_data.ipynb))
    - divide processed data into training, validation and testing splits
-6. `7_train.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/7-train/7_train.ipynb))
+7. `7_train.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/7-train/notebooks/7_train.ipynb))
    - fine-tune pre-trained transformers model to flag tweets that need and do not need support
    - pre-trained model is trained using training and validation split
    - fine-tuned model is then exported to disk and evaluated using test split
      - model evaluation is performed using ML and business metrics
-7. `8_inference.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/8-inference/8_inference.ipynb))
+8. `8_inference.ipynb` ([view](https://nbviewer.org/github/elsdes3/big-data-ml/blob/main/notebooks/8-inference/notebooks/8_inference.ipynb))
    - trends in fine-tuned model's probabilistic predictions are examined in order to compare the same after re-training in production
    - this is necessary in order to ensure model performs as expected in production, when making inference predictions
 

@@ -132,13 +132,15 @@ All available filtered data will be manually labeled to determine the sentiment 
 - 1 for neutral sentiment
 - 2 for positive sentiment
 
-In production, tweets with negative or neutral sentiment must be read by mission support team members. So, the three sentiment labels will be binarized as follows
+In production, tweets with negative or neutral sentiment must be read by mission support team members as these are the tweets that might require support (response) from a mission team member. So, the three manually labeled sentiment will be binarized as follows
 - a label of 0 (or *does not need support*) will be assigned to all tweets with a positive sentiment
   - this is the majority class in a binary classification problem
 - a label of 1 (or *needs support*) will be assigned to all tweets with a negative or neutral sentiment
   - this is the minority class
 
-Training, validation and testing splits will be created. A pre-trained transformers model will be fine-tuned using the training and validation split. The fine-tuned model will be evaluated using out-of-sample (unseen) data, which is the test split.
+Training, validation and testing splits will be created. As mentioned above, all data (tweets) in each split will be manually labeled to indicate the sentiment of the tweet.
+
+A pre-trained transformers model will be fine-tuned using the labeled data in the training and validation split. The fine-tuned model will be evaluated using out-of-sample (unseen) labeled data, which is the test split.
 
 ### Does it involve description, detection, prediction, or behavior change?
 Prediction.
@@ -253,6 +255,10 @@ After every five batches of new data, re-training will be performed as follows
   - worse than the scores from the currently deployed model by more than 15 percent, then
     - a new model will be registered in Sagemaker's model registry
     - the new (re-trained) model will be deployed to a new endpoint for making subsequent inference predictions
+
+The manual labeling of tweets should be consistent. This means the labeling process should be guided where possible. This will help scale the manual labeling process in production. For this purpose, a guide has been created to indicate how labels are assigned to tweets, where possible. The first 300 tweets from the test split comply with this guide. All other tweets in the training, validation and test split generally follow this guide. Future work should
+- verify that these other tweets also comply with these guidelines
+- add more categories to this guide as necessary
 
 --------
 
