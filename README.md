@@ -7,7 +7,6 @@
 ![OpenSource](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
-![pyup](https://pyup.io/repos/github/elsdes3/space-mission-negative-sentiment-tweet-identifier/shield.svg)
 
 ## [Table of Contents](#table-of-contents)
 1. [About](#about)
