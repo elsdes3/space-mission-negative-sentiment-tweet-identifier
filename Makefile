@@ -91,6 +91,12 @@ down:
 	@docker compose down
 .PHONY: down
 
+## Remove unused data in Docker
+docker-prune:
+	@echo "+ $@"
+	@docker system prune -f
+.PHONY: docker-prune
+
 ## Cleanup combine-data service
 reset-combine-data:
 	@echo "+ $@"
