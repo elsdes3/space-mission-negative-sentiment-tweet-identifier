@@ -40,7 +40,7 @@ The value of using a ML-based approach to flag tweets needing support was estima
 
 if the fine-tuned transformer model was used to predict if tweets in the test split needed support or not compared to the corresponding predictions made using an alternative naive approach that did not use ML (i.e. randomly guessing if tweets needed support). The ML-based approach was shown deliver value by reducing time missed and time wasted compared to the non-ML (naive, random guessing) approach to predicting if tweets needed support or not.
 
-For full details about the background, motivation and implementation overview, please see the [full project scope](https://github.com/elsdes3/space-mission-negative-sentiment-tweet-identifier/master/).
+For full details about the background, motivation and implementation overview, please see the [full project scope](https://github.com/elsdes3/space-mission-negative-sentiment-tweet-identifier/blob/main/scoping.md).
 
 ## [Pre-Requisites](#pre-requisites)
 1. The following AWS ([1](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_environment.html), [2](https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html)) and [Twitter Developer API](https://developer.twitter.com/en/docs/twitter-api/getting-started/getting-access-to-the-twitter-api) credentials
