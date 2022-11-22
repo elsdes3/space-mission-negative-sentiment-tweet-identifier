@@ -235,16 +235,14 @@ In the training, validation and test splits, a column with the batch number will
   - inference will be performed on the most current batch in the test split file
   - no new data will be appended to the file containing the training and validation split files
 
-After every five batches of new data, re-training will be performed as follows
+Every five batches of new data (tweets) will be manually labeled.
+
+After every five batches of new data, evaluation will be performed as follows
 - the existing model will be used to make inference predictions and the mission support team will begin reading and responding to negative-sentiment tweets as necessary
-- the newest batch of tweets (in the test split) will be manually labeled
-  - this will amount to manually labeling every five batches of new data
-- in the test split
-  - the second-last labeled batch will become the validation split
-  - all labeled batches up to but not including the second last batch will be appended to the training split
-- the ML model will be re-trained using the updated training, validation and test splits
-- ML model predictions will be evaluated using the test split
-- if the re-trained model metrics are
+- (as mentioned above) the newest batch of tweets (in the test split) will be manually labeled
+  - since evaluation occurs every five batches of new data (tweets), manual labeling is performed as part of this evaluation process
+- the existing ML model's predictions will be evaluated using newest labeled batch of data
+- if the existing model's metrics are
   - within 15 percent of the
     - F2-score
     - time wasted
@@ -253,8 +251,18 @@ After every five batches of new data, re-training will be performed as follows
 
     then the current model will continue to be used to serve the next five batches of inference data
   - worse than the scores from the currently deployed model by more than 15 percent, then
+    - a new model will be trained using all available data (detailed below)
     - a new model will be registered in Sagemaker's model registry
     - the new (re-trained) model will be deployed to a new endpoint for making subsequent inference predictions
+
+Re-training will be performed as follows
+- in the test split
+  - the second-last labeled batch will become the validation split
+  - all labeled batches up to but not including the second last labeled batch will be appended to the training split
+- the newest labeled batch of tweets will become the test split
+- the ML model will be re-trained using the updated training, validation and test splits
+- the re-trained ML model predictions will be evaluated using the test split
+- once performance is acceptable, the newest model will be deployed to a new endpoint for making future inference predictions
 
 The manual labeling of tweets should be consistent. This means the labeling process should be guided where possible. This will help scale the manual labeling process in production. For this purpose, a guide has been created to indicate how labels are assigned to tweets, where possible. The first 300 tweets from the test split comply with this guide. All other tweets in the training, validation and test split generally follow this guide. Future work should
 - verify that these other tweets also comply with these guidelines
